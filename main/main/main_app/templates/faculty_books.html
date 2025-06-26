@@ -1,0 +1,84 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ facultet.name }} - Книги</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+  <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="logo">
+      <div class="log_p"><img src="{% static 'image/emblem.png' %}" alt="logo" /></div>
+      <div class="site-title">ОТДЕЛ РАЗРАБОТКИ<br />МУЛЬТИМЕДИЙНОГО КОНТЕНТА</div>
+      <div><button class="menu-toggle" onclick="toggleMenu()">☰</button></div>
+    </div>
+    <nav class="nav" id="navMenu">
+      <a href="{% url 'books:index' %}">ГЛАВНАЯ</a>
+      <div class="dropdown">
+        <a href="#" onclick="toggleDropdown(event)">КАТАЛОГ</a>
+        <div class="dropdown-content" id="dropdownMenu">
+          {% for f in facultets %}
+            <a href="{% url 'books:faculty_books' f.id %}">{{ f.name }}</a>
+          {% endfor %}
+        </div>
+      </div>
+      <a href="#">КОНТАКТЫ</a>
+    </nav>
+  </header>
+  <main>
+    <h1>Книги факультета: {{ facultet.name }}</h1>
+    <div class="book-list">
+      {% for book in books %}
+       <div class="book-item">
+  {% if book.title_image %}
+    <a href="{% url 'books:book_detail' book.id %}">
+      <img src="{{ book.title_image.url }}" alt="{{ book.name }}" class="book-img">
+    </a>
+  {% else %}
+    <a href="{% url 'books:book_detail' book.id %}">
+      <img src="https://via.placeholder.com/150x200" alt="{{ book.name }}" class="book-img">
+    </a>
+  {% endif %}
+  <div class="book-title">{{ book.name }}</div>
+  <div class="book-author">Автор: {{ book.author }}</div>
+</div>
+      {% empty %}
+        <p>Нет книг для этого факультета.</p>
+      {% endfor %}
+    </div>
+    <a href="{% url 'books:index' %}">Вернуться на главную</a>
+  </main>
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-column">
+        <img src="{% static 'image/emblem.png' %}" alt="logo" class="logo" />
+        <h3>Контакты</h3>
+        <p>160012, город Шымкент,<br>проспект Тауке хана, 5</p>
+        <p><strong>Канцелярия</strong><br>8 (725-2) 21-01-41</p>
+        
+      </div>
+      <div class="footer-column">
+        <h3>О нас</h3>
+        <p><strong>Отдел разработки мультимедийного контента</strong>
+        <p>160012, город Шымкент,<br>проспект Тауке хана, 5, Корпус Г, ауд.115</p>
+        <p><strong>Контактный телефон</strong><br>8 (725-2) 30-05-72</p>
+        <p><a href="mailto:info@auezov.edu.kz">info@auezov.edu.kz</a></p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      © 2025 М.ӘУЕЗОВ АТЫНДАҒЫ ОҢТҮСТІК ҚАЗАҚСТАН УНИВЕРСИТЕТІ
+    </div>
+  </footer>
+  <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+  <script>
+    function toggleMenu() {
+      const nav = document.getElementById("navMenu");
+      nav.classList.toggle("show");
+    }
+  </script>
+  <script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>

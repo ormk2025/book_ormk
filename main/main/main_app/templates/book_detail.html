@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ book.name }}</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+</head>
+<body>
+  <header class="header">
+    <div class="logo">
+      <div class="log_p"><img src="{% static 'image/emblem.png' %}" alt="logo" /></div>
+      <div class="site-title">ОТДЕЛ РАЗРАБОТКИ<br />МУЛЬТИМЕДИЙНОГО КОНТЕНТА</div>
+      <div><button class="menu-toggle" onclick="toggleMenu()">☰</button></div>
+    </div>
+    <nav class="nav" id="navMenu">
+      <a href="{% url 'books:index' %}">ГЛАВНАЯ</a>
+      <a href="#">КОНТАКТЫ</a>
+    </nav>
+  </header>
+  <main>
+    <h1>{{ book.name }}</h1>
+    <p><strong>Автор:</strong> {{ book.author }}</p>
+    <p><strong>Год:</strong> {{ book.year }}</p>
+    <p><strong>Факультет:</strong> {{ book.facultet.name }}</p>
+    <p><strong>Аннотация:</strong> {{ book.annotation }}</p>
+    {% if index_html_path %}
+      <a href="{{ index_html_path }}" target="_blank" class="read-link">Читать книгу</a>
+    {% else %}
+      <p>Файл книги не загружен.</p>
+    {% endif %}
+    <a href="{% url 'books:index' %}">Вернуться на главную</a>
+  </main>
+ <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-column">
+        <img src="{% static 'image/emblem.png' %}" alt="logo" class="logo" />
+        <h3>Контакты</h3>
+        <p>160012, город Шымкент,<br>проспект Тауке хана, 5</p>
+        <p><strong>Канцелярия</strong><br>8 (725-2) 21-01-41</p>
+        
+      </div>
+      <div class="footer-column">
+        <h3>О нас</h3>
+        <p><strong>Отдел разработки мультимедийного контента</strong>
+        <p>160012, город Шымкент,<br>проспект Тауке хана, 5, Корпус Г, ауд.115</p>
+        <p><strong>Контактный телефон</strong><br>8 (725-2) 30-05-72</p>
+        <p><a href="mailto:info@auezov.edu.kz">info@auezov.edu.kz</a></p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      © 2025 М.ӘУЕЗОВ АТЫНДАҒЫ ОҢТҮСТІК ҚАЗАҚСТАН УНИВЕРСИТЕТІ
+    </div>
+  </footer>
+  <script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>
