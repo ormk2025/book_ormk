@@ -20,10 +20,11 @@ def index(request):
 def faculty_books(request, facultet_id):
     facultet = get_object_or_404(Facultet, id=facultet_id)
     books = Book.objects.filter(facultet=facultet)
-    return render(request, 'faculty_books.html', {'facultet': facultet, 'books': books})
+    facultets = Facultet.objects.all()
+    return render(request, 'faculty_books.html', {'facultets': facultets,'facultet': facultet, 'books': books})
 
 def book_detail(request, book_id):
     book = get_object_or_404(Book, id=book_id)
+    facultets = Facultet.objects.all()
     index_html_path = book.get_index_html_path()
-    print(f"Путь к index.html: {index_html_path}")  # Для отладки
-    return render(request, 'book_detail.html', {'book': book, 'index_html_path': index_html_path})
+    return render(request, 'book_detail.html', {'book': book, 'facultets': facultets,'index_html_path': index_html_path})

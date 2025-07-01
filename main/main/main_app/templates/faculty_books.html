@@ -8,6 +8,204 @@
   <link rel="stylesheet" href="{% static 'css/style.css' %}" />
   <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
 </head>
+<style>
+  /* Существующие стили для header остаются без изменений */
+body{
+  height: 100vh;
+}
+/* Основной контент */
+main {
+  padding: 20px;
+  margin-top: 110px; /* Смещаем вниз из-за фиксированного header */
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+main h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+
+.book-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 20px;
+  justify-content: center;
+}
+
+.book-item {
+  text-align: center;
+  width: 200px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+}
+
+.book-img {
+  max-width: 150px;
+  height: auto;
+  margin-bottom: 10px;
+}
+
+.book-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #007bff;
+  margin-bottom: 5px;
+}
+
+.book-author {
+  font-size: 14px;
+  color: #007bff;
+}
+
+main a {
+  display: block;
+  text-align: center;
+  margin-top: 20px;
+  color: #0077ff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+main a:hover {
+  text-decoration: underline;
+}
+
+/* Адаптивность для main и book-list */
+@media (max-width: 768px) {
+  main {
+    padding: 10px;
+  }
+
+  .book-item {
+    width: 150px;
+    padding: 10px;
+  }
+
+  .book-img {
+    max-width: 120px;
+  }
+
+  main h1 {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 425px) {
+  .book-item {
+    width: 120px;
+  }
+
+  .book-img {
+    max-width: 100px;
+  }
+
+  main h1 {
+    font-size: 18px;
+  }
+
+  main a {
+    font-size: 14px;
+  }
+}
+
+/* Footer */
+.footer {
+  background: linear-gradient(135deg, #dfeeff, #f3f5ff);
+  color: #000000;
+  padding: 40px 20px 20px;
+  font-family: sans-serif;
+  margin-top: 200px;
+}
+
+.footer-content {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 30px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.footer-column {
+  flex: 1 1 200px;
+  min-width: 200px;
+}
+
+.footer-column h3 {
+  margin-bottom: 10px;
+  font-size: 16px;
+  text-transform: uppercase;
+}
+
+.footer-column p,
+.footer-column a,
+.footer-column li {
+  font-size: 14px;
+  color: #000000;
+  text-decoration: none;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.footer-column a:hover {
+  color: #0077ff;
+}
+
+.footer-bottom {
+  text-align: center;
+  padding-top: 20px;
+  font-size: 13px;
+  border-top: 1px solid #333;
+  margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+  .footer-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .footer-column {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .footer-column h3 {
+    font-size: 14px;
+  }
+
+  .footer-column p,
+  .footer-column a {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 425px) {
+  .footer {
+    padding: 20px 10px;
+  }
+
+  .footer-column h3 {
+    font-size: 12px;
+  }
+
+  .footer-column p,
+  .footer-column a {
+    font-size: 11px;
+  }
+
+  .footer-bottom {
+    font-size: 11px;
+  }
+}
+</style>
 <body>
   <header class="header">
     <div class="logo">

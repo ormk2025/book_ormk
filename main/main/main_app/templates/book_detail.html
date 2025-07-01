@@ -8,6 +8,116 @@
   <link rel="stylesheet" href="{% static 'css/style.css' %}" />
 </head>
 <body>
+  <style>
+  main {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+  max-width: 1100px;
+  margin: 0px auto 60px;
+  padding-top: 200px;
+  padding-left: 40px;
+  padding-right: 40px;
+  padding-bottom: 40px;
+  background-color: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  font-family: 'Inter', sans-serif;
+  color: #222;
+}
+
+.book-left {
+  flex: 0 0 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+}
+
+.book-cover,
+.book-title-image {
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  object-fit: cover;
+}
+
+.book-info {
+  flex: 1;
+  min-width: 280px;
+}
+
+.book-info h1 {
+  font-size: 2.2rem;
+  color: #1a1a1a;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #eaeaea;
+  padding-bottom: 10px;
+}
+
+.book-info p {
+  font-size: 1.1rem;
+  margin: 12px 0;
+  line-height: 1.6;
+}
+
+.read-link {
+  display: inline-block;
+  margin-top: 25px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #4a90e2, #007aff);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 10px;
+  font-weight: 500;
+  transition: background 0.3s ease;
+  margin-right: 20px;
+}
+
+.read-link:hover {
+  background: linear-gradient(135deg, #3b7dd8, #006ae0);
+}
+
+.back-link {
+  display: inline-block;
+  margin-top: 20px;
+  color: #007aff;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.back-link:hover {
+  color: #004fc4;
+}
+
+/* Адаптив для мобильных */
+@media (max-width: 768px) {
+  main {
+    flex-direction: column;
+    padding-top: 150px;
+  }
+
+  .book-left, .book-info {
+    width: 100%;
+  }
+
+  .book-cover,
+  .book-title-image {
+    width: 100%;
+    height: auto;
+  }
+
+  .book-info h1 {
+    font-size: 1.8rem;
+  }
+
+  .book-info p {
+    font-size: 1rem;
+  }
+}
+
+
+  </style>
   <header class="header">
     <div class="logo">
       <div class="log_p"><img src="{% static 'image/emblem.png' %}" alt="logo" /></div>
@@ -16,22 +126,44 @@
     </div>
     <nav class="nav" id="navMenu">
       <a href="{% url 'books:index' %}">ГЛАВНАЯ</a>
+      <div class="dropdown">
+        <a href="#" onclick="toggleDropdown(event)">КАТАЛОГ</a>
+        <div class="dropdown-content" id="dropdownMenu">
+          {% for f in facultets %}
+            <a href="{% url 'books:faculty_books' f.id %}">{{ f.name }}</a>
+          {% endfor %}
+        </div>
+      </div>
       <a href="#">КОНТАКТЫ</a>
     </nav>
   </header>
-  <main>
+ <main>
+  <div class="book-left">
+    {% if book.cover %}
+      <img src="{{ book.cover.url }}" alt="Обложка книги" class="book-cover" />
+    {% endif %}
+    {% if book.title_image %}
+      <img src="{{ book.title_image.url }}" alt="{{ book.name }}" class="book-title-image" />
+    {% endif %}
+  </div>
+
+  <div class="book-info">
     <h1>{{ book.name }}</h1>
     <p><strong>Автор:</strong> {{ book.author }}</p>
     <p><strong>Год:</strong> {{ book.year }}</p>
     <p><strong>Факультет:</strong> {{ book.facultet.name }}</p>
     <p><strong>Аннотация:</strong> {{ book.annotation }}</p>
+
     {% if index_html_path %}
-      <a href="{{ index_html_path }}" target="_blank" class="read-link">Читать книгу</a>
+      <a href="{{ index_html_path }}" target="_blank" class="read-link">📖 Читать книгу</a>
     {% else %}
-      <p>Файл книги не загружен.</p>
+      <p>⚠️ Файл книги не загружен.</p>
     {% endif %}
-    <a href="{% url 'books:index' %}">Вернуться на главную</a>
-  </main>
+
+    <a href="{% url 'books:index' %}" class="back-link">← Вернуться на главную</a>
+  </div>
+</main>
+
  <footer class="footer">
     <div class="footer-content">
       <div class="footer-column">
@@ -54,5 +186,29 @@
     </div>
   </footer>
   <script src="{% static 'js/main.js' %}"></script>
+   <script>
+    function toggleMenu() {
+      const nav = document.getElementById("navMenu");
+      nav.classList.toggle("show");
+    }
+    var swiper = new Swiper('.swiper-container', {
+      slidesPerView: 4,
+      spaceBetween: 20,
+      navigation: {
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev',
+      },
+      pagination: {
+        el: '.swiper-pagination',
+        clickable: true,
+      },
+      breakpoints: {
+        320: { slidesPerView: 1 },
+        480: { slidesPerView: 2 },
+        768: { slidesPerView: 3 },
+        1024: { slidesPerView: 4 },
+      }
+    });
+  </script>
 </body>
 </html>
