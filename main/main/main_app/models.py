@@ -46,12 +46,11 @@ class Book(models.Model):
         if self.mobile_folder:
             index_path = os.path.join(settings.MEDIA_ROOT, self.mobile_folder, 'index.html')
             if os.path.exists(index_path):
-                # Возвращаем URL для браузера
                 return f"{settings.MEDIA_URL}{self.mobile_folder}/index.html"
         return None
 
 
-# 🧩 Автоматическая распаковка книги после сохранения
+# 🧩 Автоматическая распаковка книги после загрузки ZIP
 @receiver(post_save, sender=Book)
 def extract_zip_on_save(sender, instance, created, **kwargs):
     """
@@ -60,13 +59,14 @@ def extract_zip_on_save(sender, instance, created, **kwargs):
     2. Распаковывает архив в media/books/{id}/
     3. Ищет папку 'mobile' и сохраняет относительный путь в mobile_folder.
     """
+    # ⚠️ Если сигнал вызван при обновлении mobile_folder — выходим
     if not created and 'mobile_zip' not in kwargs.get('update_fields', []):
         return
 
     if instance.mobile_zip:
         extract_path = os.path.join(settings.MEDIA_ROOT, 'books', str(instance.id))
 
-        # 🧹 Удаляем старую папку книги, если она существует
+        # 🧹 Удаляем старую папку книги
         if os.path.exists(extract_path):
             shutil.rmtree(extract_path)
 
@@ -80,10 +80,14 @@ def extract_zip_on_save(sender, instance, created, **kwargs):
             # 🔍 Ищем папку 'mobile'
             for root, dirs, files in os.walk(extract_path):
                 if 'mobile' in dirs:
-                    # Сохраняем относительный путь (от MEDIA_ROOT)
                     mobile_folder = os.path.relpath(os.path.join(root, 'mobile'), settings.MEDIA_ROOT)
+
+                    # ⚙️ Отключаем сигнал перед сохранением, чтобы избежать рекурсии
+                    post_save.disconnect(extract_zip_on_save, sender=Book)
                     instance.mobile_folder = mobile_folder
                     instance.save(update_fields=['mobile_folder'])
+                    post_save.connect(extract_zip_on_save, sender=Book)
+
                     print(f"[OK] Книга распакована в: {mobile_folder}")
                     break
             else:
@@ -91,4 +95,3 @@ def extract_zip_on_save(sender, instance, created, **kwargs):
 
         except Exception as e:
             print(f"[ERROR] Ошибка при распаковке ZIP: {e}")
-
