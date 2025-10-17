@@ -63,43 +63,41 @@ class Book(models.Model):
 
         return None
 
-
 @receiver(post_save, sender=Book)
 def extract_zip_on_save(sender, instance, created, **kwargs):
     """
     После загрузки ZIP:
     - Распаковывает в media/books/{id}/
-    - Ищет index.html (в корне или в mobile/)
-    - Сохраняет правильную папку в mobile_folder
+    - Автоматически ищет index.html
+    - Сохраняет путь до папки, где он найден
     """
-    if not created and 'mobile_zip' not in kwargs.get('update_fields', []):
+    if not created and 'mobile_zip' not in (kwargs.get('update_fields') or []):
         return
 
     if instance.mobile_zip:
         extract_path = os.path.join(settings.MEDIA_ROOT, 'books', str(instance.id))
 
-        # Удаляем старую папку
+        # 🧹 Удаляем старую папку книги, если она уже есть
         if os.path.exists(extract_path):
             shutil.rmtree(extract_path)
 
         try:
             os.makedirs(extract_path, exist_ok=True)
 
+            # 📦 Распаковываем архив
             with zipfile.ZipFile(instance.mobile_zip.path, 'r') as zip_ref:
                 zip_ref.extractall(extract_path)
 
             found_folder = None
 
-            # Ищем index.html (приоритетно mobile, потом просто index.html)
+            # 🔍 Ищем, где находится index.html
             for root, dirs, files in os.walk(extract_path):
-                if 'mobile' in dirs:
-                    found_folder = os.path.relpath(os.path.join(root, 'mobile'), settings.MEDIA_ROOT)
-                    break
-                elif 'index.html' in files:
+                if 'index.html' in files:
                     found_folder = os.path.relpath(root, settings.MEDIA_ROOT)
                     break
 
             if found_folder:
+                # 🚫 Избегаем рекурсии при сохранении
                 post_save.disconnect(extract_zip_on_save, sender=Book)
                 instance.mobile_folder = found_folder
                 instance.save(update_fields=['mobile_folder'])
