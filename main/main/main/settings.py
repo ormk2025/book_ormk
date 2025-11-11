@@ -13,8 +13,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path('/var/www/clients/client3/web71/web/project')
-
+# BASE_DIR = Path('/var/www/clients/client3/web71/web/project')
+BASE_DIR = Path(__file__).resolve().parent.parent 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -24,6 +24,7 @@ SECRET_KEY = 'django-insecure-jt0s9=6-ge!k862ruqm0%+eyi+ymh*ma(amzsqi^fgdx0#jr-&
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
+
 ALLOWED_HOSTS = ['*']
 
 CSRF_TRUSTED_ORIGINS = ['https://book.auezov.edu.kz', 'https://www.book.auezov.edu.kz']
@@ -79,10 +80,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-if DEBUG:
-    from django.conf import settings
-    from django.conf.urls.static import static
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
 # Password validation

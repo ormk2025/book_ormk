@@ -7,60 +7,60 @@
   <title>Электронные учебные издания ЮКУ им. М.Ауэзова</title>
   <link rel="stylesheet" href="{% static 'css/style.css' %}" />
   <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+  
 </head>
 <body>
+ 
   <header class="header">
-    <div class="logo">
-      <div class="log_p"><img src="{% static 'image/emblem.png' %}" alt="logo" /></div>
-      <div class="site-title">ОТДЕЛ РАЗРАБОТКИ<br />МУЛЬТИМЕДИЙНОГО КОНТЕНТА</div>
-      <div><button class="menu-toggle" onclick="toggleMenu()">☰</button></div>
-    </div>
-    <nav class="nav" id="navMenu">
-      <a href="{% url 'books:index' %}">ГЛАВНАЯ</a>
-      <div class="dropdown">
-        <a href="#" onclick="toggleDropdown(event)">КАТАЛОГ</a>
-        <div class="dropdown-content" id="dropdownMenu">
-          {% for facultet in facultets %}
-            <a href="{% url 'books:faculty_books' facultet.id %}">{{ facultet.name }}</a>
-          {% endfor %}
-        </div>
+  <div class="logo">
+    <div class="log_p"><img src="{% static 'image/emblem.png' %}" alt="logo" /></div>
+    <div class="site-title">ОТДЕЛ РАЗРАБОТКИ<br>МУЛЬТИМЕДИЙНОГО КОНТЕНТА</div>
+    <div><button class="menu-toggle" onclick="toggleMenu()">☰</button></div>
+  </div>
+  <nav class="nav" id="navMenu">
+    <a href="{% url 'books:index' %}">ГЛАВНАЯ</a>
+    <a href="{% url 'books:all_books' %}">ВСЕ КНИГИ</a>
+    <div class="dropdown">
+      <a href="#" onclick="toggleDropdown(event)">КАТАЛОГ</a>
+      <div class="dropdown-content" id="dropdownMenu">
+        {% for facultet in facultets %}
+          <a href="{% url 'books:faculty_books' facultet.id %}">{{ facultet.name }}</a>
+        {% endfor %}
       </div>
-      <a href="#">КОНТАКТЫ</a>
-    </nav>
-  </header>
+    </div>
+    <a href="#contacts" onclick="scrollToFooter(event)">КОНТАКТЫ</a>
+  </nav>
+</header>
 
-  <section class="intro">
-    <h1>Каталог электронных учебно-методических изданий<br />преподавателей ЮКУ им.М.Ауэзова</h1>
-    <div class="stats">
-      <div class="stat">
-        <span class="stat-number">78422</span><br />ЭЛЕКТРОННЫХ ИЗДАНИЙ
-      </div>
-      
+<section class="intro">
+  <h1>Каталог электронных учебно-методических изданий<br>преподавателей ЮКУ им.М.Ауэзова</h1>
+  <div class="stats">
+    <div class="stat">
+      <span class="stat-number">1950</span><br>ЭЛЕКТРОННЫХ ИЗДАНИЙ
     </div>
-  </section>
+  </div>
+</section>
 
-  <main class="search-section">
-    <div class="search-tabs">
-      <a href="#">Поиск</a>
-      
+<main class="search-section">
+  <div class="search-box">
+    <div class="search-row">
+      <label for="filter" class="filter-label">Фильтр:</label>
+      <select id="filter">
+        <option>Все поля</option>
+        <option>Автор</option>
+        <option>Название</option>
+        <option>Шифр специальности</option>
+        <option>Год</option>
+      </select>
+      <form method="get">
+        <input type="text" name="q" placeholder="Введите название, автора или год" />
+        <button type="submit" class="search-button">ПОИСК</button>
+      </form>
     </div>
-    <div class="search-box">
-      <div class="search-row">
-        <select>
-          <option>Все поля</option>
-          <option>Автор</option>
-          <option>Название</option>
-          <option>Шифр специальности</option>
-          <option>Год</option>
-        </select>
-        <form method="get">
-          <input type="text" name = "q" placeholder="Введите название ЭИ, автора, год, либо шифр специальности для поиска" />
-          <button  type = "submit" class="search-button">ПОИСК</button>
-        </form>
-      </div>
-      
-    </div>
-  </main>
+  </div>
+</main>
+
+
  <h2 class="last">{% if search %}Результаты поиска{% else %}ПОСЛЕДНЕЕ{% endif %}</h2>
   <div class="swiper-container">
     <div class="swiper-wrapper">
@@ -97,15 +97,22 @@
       <div class="footer-column">
         <h3>О нас</h3>
         <p><strong>Отдел разработки мультимедийного контента</strong>
-        <p>160012, город Шымкент,<br>проспект Тауке хана, 5, Корпус Г, ауд.115</p>
+        <p>160012, город Шымкент,<br>проспект Тауке хана, 5, Корпус Д, ауд.201</p>
         <p><strong>Контактный телефон</strong><br>8 (725-2) 30-05-72</p>
-        <p><a href="mailto:info@auezov.edu.kz">info@auezov.edu.kz</a></p>
+        <p><a href="mailto:info@auezov.edu.kz">content-ormk@auezov.edu.kz</a></p>
       </div>
     </div>
     <div class="footer-bottom">
       © 2025 М.ӘУЕЗОВ АТЫНДАҒЫ ОҢТҮСТІК ҚАЗАҚСТАН УНИВЕРСИТЕТІ
     </div>
   </footer>
+
+<script>
+function scrollToFooter(event) {
+  event.preventDefault();
+  document.querySelector("footer").scrollIntoView({ behavior: "smooth" });
+}
+</script>
   <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
   <script>
     function toggleMenu() {

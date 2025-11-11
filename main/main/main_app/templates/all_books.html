@@ -1,0 +1,127 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Все книги</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+  <style>
+body {
+  background: radial-gradient(circle at 20% 20%, #f8f9fa, #e9ecef, #dee2e6);
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  color: #222;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+/* эффект "ауры" книжного портала */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 30% 40%, rgba(255,255,240,0.4), transparent 60%),
+              radial-gradient(circle at 80% 70%, rgba(230,240,255,0.5), transparent 70%);
+  z-index: -1;
+  filter: blur(60px);
+}
+
+/* улучшение header */
+.header {
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  border-bottom: 1px solid rgba(255,255,255,0.3);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+/* плавное появление контента */
+main, section, footer {
+  animation: fadeIn 0.8s ease-in-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* карточки книг немного “парят” */
+.swiper-slide {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.swiper-slide:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+/* кнопка поиска */
+.search-button {
+  background: linear-gradient(135deg, #0066cc, #0099ff);
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+.search-button:hover {
+  background: linear-gradient(135deg, #0052a3, #0080e0);
+}
+
+/* футер */
+.footer {
+  background: linear-gradient(135deg, #e3f2fd, #fafafa);
+  border-top: 1px solid #d0d0d0;
+}
+.footer-bottom {
+  color: #444;
+}
+</style>
+
+</head>
+<body>
+  <header class="header">
+    <div class="logo">
+      <div class="log_p"><img src="{% static 'image/emblem.png' %}" alt="logo" /></div>
+      <div class="site-title">ОТДЕЛ РАЗРАБОТКИ<br>МУЛЬТИМЕДИЙНОГО КОНТЕНТА</div>
+      <div><button class="menu-toggle" onclick="toggleMenu()">☰</button></div>
+    </div>
+    <nav class="nav" id="navMenu">
+      <a href="{% url 'books:index' %}">ГЛАВНАЯ</a>
+      <a href="{% url 'books:all_books' %}" class="active">ВСЕ КНИГИ</a>
+    <a href="{% url 'books:all_books' %}">ВСЕ КНИГИ</a>
+      <a href="#contacts" onclick="scrollToFooter(event)">КОНТАКТЫ</a>
+    </nav>
+  </header>
+
+  <main class="all-books">
+    <h1>Все книги ({{ total_books }})</h1>
+    <ul class="book-list">
+      {% for book in books %}
+        <li><a href="{% url 'books:book_detail' book.id %}">{{ book.name }}</a></li>
+      {% empty %}
+        <p>Нет книг для отображения.</p>
+      {% endfor %}
+    </ul>
+  </main>
+
+  <footer id="contacts" class="footer">
+    <div class="footer-bottom">
+      © 2025 М.ӘУЕЗОВ АТЫНДАҒЫ ОҢТҮСТІК ҚАЗАҚСТАН УНИВЕРСИТЕТІ
+    </div>
+  </footer>
+
+  <script>
+  function scrollToFooter(event) {
+    event.preventDefault();
+    document.querySelector("footer").scrollIntoView({ behavior: "smooth" });
+  }
+  </script>
+</body>
+</html>
