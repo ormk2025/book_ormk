@@ -187,7 +187,12 @@ td:first-child {
     document.querySelector("footer").scrollIntoView({ behavior: "smooth" });
   }
   </script>
+  <script>
+    function toggleMenu() {
+      const nav = document.getElementById("navMenu");
+      nav.classList.toggle("show");
+    }
+  </script>
   <script src="{% static 'js/main.js' %}"></script>
-
 </body>
 </html>
