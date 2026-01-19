@@ -108,3 +108,14 @@ def extract_zip_on_save(sender, instance, created, **kwargs):
 
         except Exception as e:
             print(f"[ERROR] Ошибка при распаковке ZIP: {e}")
+
+
+
+
+class VideoLecture(models.Model):
+    title = models.CharField(max_length=300)
+    video_file = models.FileField(upload_to='video_lectures/')
+    description = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.title

@@ -1,0 +1,195 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Видеолекции</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<style>
+.video-page {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.video-title {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 25px;
+}
+
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.video-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  overflow: hidden;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.video-card:hover {
+  transform: translateY(-4px);
+}
+
+.video-preview {
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 50px;
+}
+
+.video-body {
+  padding: 15px;
+}
+
+.video-name {
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.video-desc {
+  font-size: 14px;
+  color: #555;
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal-content {
+  background: white;
+  width: 90%;
+  max-width: 900px;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.modal-header {
+  padding: 15px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+}
+
+.modal iframe, 
+.modal video {
+  width: 100%;
+  height: 480px;
+}
+
+.close-btn {
+  cursor: pointer;
+  font-size: 20px;
+}
+</style>
+
+<body>
+
+ <header class="header">
+  <div class="logo">
+    <div class="log_p"><img src="{% static 'image/emblem.png' %}" alt="logo" /></div>
+    <div class="site-title">ОТДЕЛ РАЗРАБОТКИ<br>МУЛЬТИМЕДИЙНОГО КОНТЕНТА</div>
+    <div><button class="menu-toggle" onclick="toggleMenu()">☰</button></div>
+  </div>
+  <nav class="nav" id="navMenu">
+    <a href="{% url 'books:index' %}">ГЛАВНАЯ</a>
+    <a href="{% url 'books:all_books' %}">ВСЕ КНИГИ</a>
+     <a href="{% url 'books:video_lectures' %}">ВИДЕОЛЕКЦИИ</a>
+    <div class="dropdown">
+      <a href="#" onclick="toggleDropdown(event)">КАТАЛОГ</a>
+      <div class="dropdown-content" id="dropdownMenu">
+        {% for facultet in facultets %}
+          <a href="{% url 'books:faculty_books' facultet.id %}">{{ facultet.name }}</a>
+        {% endfor %}
+      </div>
+    </div>
+    <a href="#contacts" onclick="scrollToFooter(event)">КОНТАКТЫ</a>
+  </nav>
+</header>
+
+<div class="video-page">
+  <div class="video-title">🎓 Видеолекции</div>
+
+  <div class="video-grid">
+    {% for video in videos %}
+      <div class="video-card" onclick="openVideo('{{ video.video_file.url }}', '{{ video.title }}')">
+        <div class="video-preview">▶</div>
+        <div class="video-body">
+          <div class="video-name">{{ video.title }}</div>
+          <div class="video-desc">
+            {{ video.description|truncatechars:80 }}
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <p>Пока нет видеолекций</p>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal" id="videoModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <span id="modalTitle"></span>
+      <span class="close-btn" onclick="closeVideo()">✕</span>
+    </div>
+    <video id="modalVideo" controls></video>
+  </div>
+</div>
+ <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-column">
+        <img src="{% static 'image/emblem.png' %}" alt="logo" class="logo" />
+        <h3>Контакты</h3>
+        <p>160012, город Шымкент,<br>проспект Тауке хана, 5</p>
+        <p><strong>Канцелярия</strong><br>8 (725-2) 21-01-41</p>
+        
+      </div>
+      <div class="footer-column">
+        <h3>О нас</h3>
+        <p><strong>Отдел разработки мультимедийного контента</strong>
+        <p>160012, город Шымкент,<br>проспект Тауке хана, 5, Корпус Д, ауд.201</p>
+        <p><strong>Контактный телефон</strong><br>8 (725-2) 30-05-72</p>
+        <p><a href="mailto:info@auezov.edu.kz">content-ormk@auezov.edu.kz</a></p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      © 2025 М.ӘУЕЗОВ АТЫНДАҒЫ ОҢТҮСТІК ҚАЗАҚСТАН УНИВЕРСИТЕТІ
+    </div>
+  </footer>
+<script>
+function openVideo(url, title) {
+  document.getElementById("videoModal").style.display = "flex";
+  document.getElementById("modalVideo").src = url;
+  document.getElementById("modalTitle").innerText = title;
+}
+
+function closeVideo() {
+  document.getElementById("videoModal").style.display = "none";
+  document.getElementById("modalVideo").src = "";
+}
+</script>
+
+</body>
+</html>

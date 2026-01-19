@@ -118,25 +118,28 @@
 
 
   </style>
+  
   <header class="header">
-    <div class="logo">
-      <div class="log_p"><img src="{% static 'image/emblem.png' %}" alt="logo" /></div>
-      <div class="site-title">ОТДЕЛ РАЗРАБОТКИ<br />МУЛЬТИМЕДИЙНОГО КОНТЕНТА</div>
-      <div><button class="menu-toggle" onclick="toggleMenu()">☰</button></div>
-    </div>
-    <nav class="nav" id="navMenu">
-      <a href="{% url 'books:index' %}">ГЛАВНАЯ</a>
-      <div class="dropdown">
-        <a href="#" onclick="toggleDropdown(event)">КАТАЛОГ</a>
-        <div class="dropdown-content" id="dropdownMenu">
-          {% for f in facultets %}
-            <a href="{% url 'books:faculty_books' f.id %}">{{ f.name }}</a>
-          {% endfor %}
-        </div>
+  <div class="logo">
+    <div class="log_p"><img src="{% static 'image/emblem.png' %}" alt="logo" /></div>
+    <div class="site-title">ОТДЕЛ РАЗРАБОТКИ<br>МУЛЬТИМЕДИЙНОГО КОНТЕНТА</div>
+    <div><button class="menu-toggle" onclick="toggleMenu()">☰</button></div>
+  </div>
+  <nav class="nav" id="navMenu">
+    <a href="{% url 'books:index' %}">ГЛАВНАЯ</a>
+    <a href="{% url 'books:all_books' %}">ВСЕ КНИГИ</a>
+     <a href="{% url 'books:video_lectures' %}">ВИДЕОЛЕКЦИИ</a>
+    <div class="dropdown">
+      <a href="#" onclick="toggleDropdown(event)">КАТАЛОГ</a>
+      <div class="dropdown-content" id="dropdownMenu">
+        {% for facultet in facultets %}
+          <a href="{% url 'books:faculty_books' facultet.id %}">{{ facultet.name }}</a>
+        {% endfor %}
       </div>
-      <a href="#">КОНТАКТЫ</a>
-    </nav>
-  </header>
+    </div>
+    <a href="#contacts" onclick="scrollToFooter(event)">КОНТАКТЫ</a>
+  </nav>
+</header>
  <main>
   <div class="book-left">
     {% if book.cover %}

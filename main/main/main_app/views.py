@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Q
-from .models import Facultet, Book
+from .models import Facultet, Book, VideoLecture
 
 
 def index(request):
@@ -58,4 +58,16 @@ def book_detail(request, book_id):
         'book': book,
         'facultets': facultets,
         'index_html_path': index_html_path
+    })
+
+
+
+
+def video_lectures(request):
+    
+    videos = VideoLecture.objects.all().order_by('-id')
+
+    return render(request, 'video_lectures.html', {
+        
+        'videos': videos
     })
