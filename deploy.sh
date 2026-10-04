@@ -44,8 +44,11 @@ print('копия базы:', sys.argv[1])
 PYEOF
 
 echo "=== 2. Состояние до деплоя ==="
-git -C "$REPO" rev-parse --short HEAD | tee "$BACKUPS/commit-before-$STAMP.txt"
-"$PY" manage.py shell -c "from main_app.models import Book, Facultet, VideoLecture; print('книг', Book.objects.count(), '| факультетов', Facultet.objects.count(), '| видео', VideoLecture.objects.count())" | tee "$BACKUPS/counts-before-$STAMP.txt"
+BEFORE_COMMIT="$(git -C "$REPO" rev-parse --short HEAD)"
+echo "$BEFORE_COMMIT" > "$BACKUPS/commit-before-$STAMP.txt"
+echo "коммит до деплоя: $BEFORE_COMMIT"
+"$PY" manage.py shell -c "from main_app.models import Book, Facultet, VideoLecture; print('книг', Book.objects.count(), '| факультетов', Facultet.objects.count(), '| видео', VideoLecture.objects.count())" > "$BACKUPS/counts-before-$STAMP.txt"
+cat "$BACKUPS/counts-before-$STAMP.txt"
 
 echo "=== 3. Миграция 0008 (её нет в git, иначе pull упадёт) ==="
 M008="$APP/main_app/migrations/0008_videolecture.py"
@@ -77,7 +80,9 @@ echo "=== 8. Статика ==="
 echo "=== 9. Перезапуск ==="
 date > "$TRIGGER" 2>/dev/null || echo "не удалось записать $TRIGGER"
 ok=0
-for _ in $(seq 1 15); do
+i=0
+while [ "$i" -lt 15 ]; do
+    i=$((i + 1))
     sleep 2
     if curl -s "http://127.0.0.1:$PORT/" | grep -q "$MARKER"; then
         ok=1; break

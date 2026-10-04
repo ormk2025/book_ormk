@@ -44,7 +44,9 @@ fi
 echo "=== 3. Перезапуск ==="
 date > "$TRIGGER" 2>/dev/null || echo "не удалось записать $TRIGGER"
 old=0
-for _ in $(seq 1 15); do
+i=0
+while [ "$i" -lt 15 ]; do
+    i=$((i + 1))
     sleep 2
     if ! curl -s "http://127.0.0.1:$PORT/" | grep -q "$MARKER"; then
         old=1; break
