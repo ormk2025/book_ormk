@@ -8,5 +8,6 @@ urlpatterns = [
     path('all/', views.all_books, name='all_books'),
     path('faculty/<int:facultet_id>/', views.faculty_books, name='faculty_books'),
     path('book/<int:book_id>/', views.book_detail, name='book_detail'),
+    path('chapter/<int:chapter_id>/', views.chapter_detail, name='chapter_detail'),
     path('video-lectures/', views.video_lectures, name='video_lectures'),
 ]

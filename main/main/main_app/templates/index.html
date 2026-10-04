@@ -4,23 +4,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Электронные учебные издания ЮКУ им. М.Ауэзова</title>
+  <title>Электронные учебные издания — ЮКУ им. М.Ауэзова</title>
+  <meta name="description" content="Каталог электронных учебно-методических изданий преподавателей Южно-Казахстанского университета им. М.Ауэзова. Более 1950 книг по всем специальностям." />
   <link rel="stylesheet" href="{% static 'css/style.css' %}" />
   <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
-  
 </head>
 <body>
- 
-  <header class="header">
+
+<!-- ============ HEADER ============ -->
+<header class="header" id="mainHeader">
   <div class="logo">
-    <div class="log_p"><img src="{% static 'image/emblem.png' %}" alt="logo" /></div>
+    <div class="log_p"><img src="{% static 'image/emblem.png' %}" alt="ЮКУ" /></div>
     <div class="site-title">ОТДЕЛ РАЗРАБОТКИ<br>МУЛЬТИМЕДИЙНОГО КОНТЕНТА</div>
     <div><button class="menu-toggle" onclick="toggleMenu()">☰</button></div>
   </div>
   <nav class="nav" id="navMenu">
     <a href="{% url 'books:index' %}">ГЛАВНАЯ</a>
     <a href="{% url 'books:all_books' %}">ВСЕ КНИГИ</a>
-     <a href="{% url 'books:video_lectures' %}">ВИДЕОЛЕКЦИИ</a>
+    <a href="{% url 'books:video_lectures' %}">ВИДЕОЛЕКЦИИ</a>
     <div class="dropdown">
       <a href="#" onclick="toggleDropdown(event)">КАТАЛОГ</a>
       <div class="dropdown-content" id="dropdownMenu">
@@ -33,19 +34,62 @@
   </nav>
 </header>
 
-<section class="intro">
-  <h1>Каталог электронных учебно-методических изданий<br>преподавателей ЮКУ им.М.Ауэзова</h1>
-  <div class="stats">
-    <div class="stat">
-      <span class="stat-number">1950</span><br>ЭЛЕКТРОННЫХ ИЗДАНИЙ
+<!-- ============ HERO ============ -->
+<section class="hero" id="heroSection">
+  <!-- Floating Particles -->
+  <div class="particles" id="particles"></div>
+
+  <!-- Parallax geometric shapes -->
+  <div class="parallax-shapes" id="parallaxShapes">
+    <div class="shape shape-circle" data-speed="0.03"></div>
+    <div class="shape shape-ring" data-speed="0.05"></div>
+    <div class="shape shape-square" data-speed="0.02"></div>
+    <div class="shape shape-dots" data-speed="0.04"></div>
+    <div class="shape shape-triangle" data-speed="0.06"></div>
+    <div class="shape shape-cross" data-speed="0.025"></div>
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      Электронная библиотека университета
+    </div>
+
+    <h1>
+      Учебные издания<br>
+      <span class="gradient-text">ЮКУ им. М.Ауэзова</span>
+    </h1>
+
+    <p class="hero-subtitle">
+      Специализированная литература по всем специальностям университета.
+      Удобный поиск по названию, автору и шифру специальности.
+    </p>
+
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-number" id="counterBooks">0</div>
+        <div class="hero-stat-label">Электронных изданий</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-number" id="counterFaculties">0</div>
+        <div class="hero-stat-label">Факультетов</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-number">24/7</div>
+        <div class="hero-stat-label">Онлайн-доступ</div>
+      </div>
     </div>
   </div>
 </section>
 
+<!-- ============ SEARCH ============ -->
 <main class="search-section">
-  <div class="search-box">
+  <div class="search-box reveal">
+    <div class="search-box-title">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:8px;color:var(--primary);"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Найдите нужное издание
+    </div>
     <div class="search-row">
-      <label for="filter" class="filter-label">Фильтр:</label>
       <select id="filter">
         <option>Все поля</option>
         <option>Автор</option>
@@ -53,17 +97,51 @@
         <option>Шифр специальности</option>
         <option>Год</option>
       </select>
-      <form method="get">
-        <input type="text" name="q" placeholder="Введите название, автора или год" />
+      <form method="get" style="display:contents;">
+        <input type="text" name="q" placeholder="Введите название, автора или год..." />
         <button type="submit" class="search-button">ПОИСК</button>
       </form>
     </div>
   </div>
 </main>
 
+<!-- ============ FEATURES ============ -->
+<section class="features-section">
+  <div class="section-header reveal">
+    <div class="section-tag">О платформе</div>
+    <h2 class="section-title">Всё для успешной учёбы</h2>
+    <p class="section-desc">Электронная библиотека ЮКУ — единая точка доступа ко всем учебным материалам университета</p>
+  </div>
 
- <h2 class="last">{% if search %}Результаты поиска{% else %}ПОСЛЕДНЕЕ{% endif %}</h2>
-  <div class="swiper-container">
+  <div class="features-grid">
+    <div class="feature-card reveal reveal-delay-1">
+      <div class="feature-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+      </div>
+      <h3>Все специальности</h3>
+      <p>Учебники и методические пособия по каждой из 13 факультетов университета — от гуманитарных до технических наук.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-2">
+      <div class="feature-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+      </div>
+      <h3>Умный поиск</h3>
+      <p>Быстрый поиск по автору, названию, году издания и шифру специальности. Находите нужные материалы за секунды.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-3">
+      <div class="feature-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+      </div>
+      <h3>Доступ отовсюду</h3>
+      <p>Читайте учебники на любом устройстве — компьютере, планшете или смартфоне. Онлайн-доступ 24 часа в сутки.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BOOKS SLIDER ============ -->
+<section class="books-section">
+  <h2 class="last reveal">{% if search %}Результаты поиска{% else %}Последние издания{% endif %}</h2>
+  <div class="swiper-container reveal">
     <div class="swiper-wrapper">
       {% if books %}
         {% for book in books %}
@@ -74,71 +152,184 @@
             </a>
           {% else %}
             <a href="{% url 'books:book_detail' book.id %}">
-              <img src="https://via.placeholder.com/150x200" alt="{{ book.name }}" class="book-img">
+              <div class="book-img" style="background:#e8eef6; display:flex; align-items:center; justify-content:center; font-size:40px;">📖</div>
             </a>
           {% endif %}
           <div class="book-title">{{ book.name }}</div>
-          <div class="book-author">Автор: {{ book.author }}</div>
+          <div class="book-author">{{ book.author }}</div>
         </div>
         {% endfor %}
       {% else %}
-        <p>Нет книг для отображения.</p>
+        <p style="text-align:center; color: var(--text-light); padding: 40px;">Нет книг для отображения.</p>
       {% endif %}
     </div>
+    <div class="swiper-button-prev"></div>
+    <div class="swiper-button-next"></div>
   </div>
-  <footer class="footer">
-    <div class="footer-content">
-      <div class="footer-column">
-        <img src="{% static 'image/emblem.png' %}" alt="logo" class="logo" />
-        <h3>Контакты</h3>
-        <p>160012, город Шымкент,<br>проспект Тауке хана, 5</p>
-        <p><strong>Канцелярия</strong><br>8 (725-2) 21-01-41</p>
-        
-      </div>
-      <div class="footer-column">
-        <h3>О нас</h3>
-        <p><strong>Отдел разработки мультимедийного контента</strong>
-        <p>160012, город Шымкент,<br>проспект Тауке хана, 5, Корпус Д, ауд.201</p>
-        <p><strong>Контактный телефон</strong><br>8 (725-2) 30-05-72</p>
-        <p><a href="mailto:info@auezov.edu.kz">content-ormk@auezov.edu.kz</a></p>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      © 2025 М.ӘУЕЗОВ АТЫНДАҒЫ ОҢТҮСТІК ҚАЗАҚСТАН УНИВЕРСИТЕТІ
-    </div>
-  </footer>
+</section>
 
+<!-- ============ CTA ============ -->
+<section class="cta-section">
+  <div class="cta-content reveal">
+    <h2>Начните читать прямо сейчас</h2>
+    <p>Откройте для себя полную коллекцию электронных учебных изданий преподавателей ЮКУ им. М.Ауэзова</p>
+    <a href="{% url 'books:all_books' %}" class="cta-btn">
+      Перейти к каталогу →
+    </a>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer" id="contacts">
+  <div class="footer-content">
+    <div class="footer-column">
+      <img src="{% static 'image/emblem.png' %}" alt="logo" class="logo" />
+      <h3>Контакты</h3>
+      <p>160012, город Шымкент,<br>проспект Тауке хана, 5</p>
+      <p><strong>Канцелярия</strong><br>8 (725-2) 21-01-41</p>
+    </div>
+    <div class="footer-column">
+      <h3>О нас</h3>
+      <p><strong>Отдел разработки мультимедийного контента</strong></p>
+      <p>160012, город Шымкент,<br>проспект Тауке хана, 5, Корпус Д, ауд.201</p>
+      <p><strong>Контактный телефон</strong><br>8 (725-2) 30-05-72</p>
+      <p><a href="mailto:content-ormk@auezov.edu.kz">content-ormk@auezov.edu.kz</a></p>
+    </div>
+    <div class="footer-column">
+      <h3>Быстрые ссылки</h3>
+      <ul>
+        <li><a href="{% url 'books:all_books' %}">Все книги</a></li>
+        <li><a href="{% url 'books:video_lectures' %}">Видеолекции</a></li>
+        {% for facultet in facultets %}
+          <li><a href="{% url 'books:faculty_books' facultet.id %}">{{ facultet.name }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    © 2025 М.ӘУЕЗОВ АТЫНДАҒЫ ОҢТҮСТІК ҚАЗАҚСТАН УНИВЕРСИТЕТІ
+  </div>
+</footer>
+
+<!-- ============ SCRIPTS ============ -->
+<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
 <script>
+// ---- Menu ----
+function toggleMenu() {
+  document.getElementById("navMenu").classList.toggle("show");
+}
+
+// ---- Swiper ----
+const swiper = new Swiper('.swiper-container', {
+  slidesPerView: 4,
+  spaceBetween: 24,
+  grabCursor: true,
+  navigation: {
+    nextEl: '.swiper-button-next',
+    prevEl: '.swiper-button-prev',
+  },
+  breakpoints: {
+    320: { slidesPerView: 1, spaceBetween: 12 },
+    480: { slidesPerView: 2, spaceBetween: 16 },
+    768: { slidesPerView: 3, spaceBetween: 20 },
+    1024: { slidesPerView: 4, spaceBetween: 24 },
+  }
+});
+
+// ---- Scroll Animations ----
+const revealEls = document.querySelectorAll('.reveal');
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.15 });
+revealEls.forEach(el => revealObserver.observe(el));
+
+// ---- Header Scroll Effect ----
+const header = document.getElementById('mainHeader');
+window.addEventListener('scroll', () => {
+  header.classList.toggle('scrolled', window.scrollY > 50);
+});
+
+// ---- Counter Animation ----
+function animateCounter(el, target, suffix, duration) {
+  let start = 0;
+  const step = target / (duration / 16);
+  const timer = setInterval(() => {
+    start += step;
+    if (start >= target) {
+      el.textContent = target.toLocaleString() + (suffix || '');
+      clearInterval(timer);
+    } else {
+      el.textContent = Math.floor(start).toLocaleString();
+    }
+  }, 16);
+}
+
+const counterObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      animateCounter(document.getElementById('counterBooks'), {{ total_books|default:"2000" }}, '+', 2200);
+      animateCounter(document.getElementById('counterFaculties'), 13, '', 1500);
+      counterObserver.disconnect();
+    }
+  });
+}, { threshold: 0.5 });
+counterObserver.observe(document.querySelector('.hero-stats'));
+
+// ---- Floating Particles ----
+(function() {
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 30; i++) {
+    const p = document.createElement('div');
+    p.classList.add('particle');
+    p.style.left = Math.random() * 100 + '%';
+    p.style.width = p.style.height = (Math.random() * 4 + 2) + 'px';
+    p.style.animationDuration = (Math.random() * 15 + 10) + 's';
+    p.style.animationDelay = (Math.random() * 10) + 's';
+    container.appendChild(p);
+  }
+})();
+
+// ---- Parallax on Hero + Shapes ----
+window.addEventListener('scroll', () => {
+  const scrollY = window.scrollY;
+  const hero = document.getElementById('heroSection');
+  if (scrollY < window.innerHeight) {
+    hero.style.backgroundPositionY = (scrollY * 0.4) + 'px';
+    const content = hero.querySelector('.hero-content');
+    if (content) {
+      content.style.transform = `translateY(${scrollY * 0.15}px)`;
+      content.style.opacity = 1 - (scrollY / (window.innerHeight * 0.8));
+    }
+    // Move geometric shapes at different speeds
+    document.querySelectorAll('.shape').forEach(shape => {
+      const speed = parseFloat(shape.dataset.speed) || 0.03;
+      shape.style.transform = `translateY(${scrollY * speed * 10}px)`;
+    });
+  }
+});
+
+// ---- Mouse Parallax on Shapes ----
+document.getElementById('heroSection').addEventListener('mousemove', (e) => {
+  const cx = (e.clientX / window.innerWidth - 0.5) * 2;
+  const cy = (e.clientY / window.innerHeight - 0.5) * 2;
+  document.querySelectorAll('.shape').forEach(shape => {
+    const speed = parseFloat(shape.dataset.speed) || 0.03;
+    const mx = cx * speed * 200;
+    const my = cy * speed * 200;
+    shape.style.transform += ` translate(${mx}px, ${my}px)`;
+  });
+});
+
+// ---- Smooth Scroll to Footer ----
 function scrollToFooter(event) {
   event.preventDefault();
-  document.querySelector("footer").scrollIntoView({ behavior: "smooth" });
+  document.getElementById("contacts").scrollIntoView({ behavior: "smooth" });
 }
 </script>
-  <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
-  <script>
-    function toggleMenu() {
-      const nav = document.getElementById("navMenu");
-      nav.classList.toggle("show");
-    }
-    var swiper = new Swiper('.swiper-container', {
-      slidesPerView: 4,
-      spaceBetween: 20,
-      navigation: {
-        nextEl: '.swiper-button-next',
-        prevEl: '.swiper-button-prev',
-      },
-      pagination: {
-        el: '.swiper-pagination',
-        clickable: true,
-      },
-      breakpoints: {
-        320: { slidesPerView: 1 },
-        480: { slidesPerView: 2 },
-        768: { slidesPerView: 3 },
-        1024: { slidesPerView: 4 },
-      }
-    });
-  </script>
-  <script src="{% static 'js/main.js' %}"></script>
+<script src="{% static 'js/main.js' %}"></script>
 </body>
 </html>

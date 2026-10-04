@@ -1,0 +1,231 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ book.name }}</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+  <style>
+    .book-page {
+      max-width: 1200px;
+      margin: 180px auto 60px;
+      padding: 0 24px;
+      font-family: 'Inter', sans-serif;
+      color: #222;
+    }
+    .book-hero {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 40px;
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.08);
+      padding: 40px;
+      margin-bottom: 30px;
+    }
+    .book-hero__cover {
+      flex: 0 0 260px;
+    }
+    .book-hero__cover img {
+      width: 100%;
+      border-radius: 14px;
+      box-shadow: 0 6px 20px rgba(0,0,0,.12);
+      object-fit: cover;
+    }
+    .book-hero__info { flex: 1; min-width: 280px; }
+    .book-hero__info h1 {
+      font-size: 2rem;
+      margin: 0 0 16px;
+      color: #1a1a1a;
+      border-bottom: 2px solid #eaeaea;
+      padding-bottom: 10px;
+    }
+    .book-hero__info p { font-size: 1.05rem; margin: 10px 0; line-height: 1.6; }
+    .book-hero__annotation { margin-top: 18px; color: #444; line-height: 1.7; }
+    .book-badge {
+      display: inline-block;
+      background: linear-gradient(135deg,#28a745,#1e7e34);
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .chapters-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 30px;
+    }
+    .chapters-sidebar {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.06);
+      padding: 24px;
+      position: sticky;
+      top: 180px;
+      align-self: start;
+      max-height: calc(100vh - 200px);
+      overflow-y: auto;
+    }
+    .chapters-sidebar h3 {
+      font-size: 1.1rem;
+      margin: 0 0 16px;
+      color: #1a1a1a;
+    }
+    .chapters-list a {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 14px;
+      border-radius: 10px;
+      text-decoration: none;
+      color: #333;
+      transition: background .2s;
+      margin-bottom: 4px;
+    }
+    .chapters-list a:hover { background: #f0f6ff; color: #007aff; }
+    .chapters-list .num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #eaf2ff;
+      color: #007aff;
+      font-weight: 600;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+    .chapters-content {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.06);
+      padding: 30px;
+    }
+    .chapters-content h2 { margin: 0 0 16px; color: #1a1a1a; }
+    .empty-msg { color: #888; font-style: italic; }
+
+    @media (max-width: 900px) {
+      .chapters-layout { grid-template-columns: 1fr; }
+      .chapters-sidebar { position: static; max-height: none; }
+      .book-hero { padding: 24px; }
+      .book-hero__cover { flex: 0 0 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="logo">
+      <div class="log_p"><img src="{% static 'image/emblem.png' %}" alt="logo" /></div>
+      <div class="site-title">ОТДЕЛ РАЗРАБОТКИ<br>МУЛЬТИМЕДИЙНОГО КОНТЕНТА</div>
+      <div><button class="menu-toggle" onclick="toggleMenu()">☰</button></div>
+    </div>
+    <nav class="nav" id="navMenu">
+      <a href="{% url 'books:index' %}">ГЛАВНАЯ</a>
+      <a href="{% url 'books:all_books' %}">ВСЕ КНИГИ</a>
+      <a href="{% url 'books:video_lectures' %}">ВИДЕОЛЕКЦИИ</a>
+      <div class="dropdown">
+        <a href="#" onclick="toggleDropdown(event)">КАТАЛОГ</a>
+        <div class="dropdown-content" id="dropdownMenu">
+          {% for facultet in facultets %}
+            <a href="{% url 'books:faculty_books' facultet.id %}">{{ facultet.name }}</a>
+          {% endfor %}
+        </div>
+      </div>
+      <a href="#contacts" onclick="scrollToFooter(event)">КОНТАКТЫ</a>
+    </nav>
+  </header>
+
+  <div class="book-page">
+    <div class="book-hero">
+      <div class="book-hero__cover">
+        {% if book.title_image %}
+          <img src="{{ book.title_image.url }}" alt="{{ book.name }}">
+        {% else %}
+          <img src="https://via.placeholder.com/260x360" alt="{{ book.name }}">
+        {% endif %}
+      </div>
+      <div class="book-hero__info">
+        <span class="book-badge">🌐 Веб-книга</span>
+        <h1>{{ book.name }}</h1>
+        <p><strong>Автор:</strong> {{ book.author }}</p>
+        <p><strong>Год:</strong> {{ book.year }}</p>
+        <p><strong>Факультет:</strong> {{ book.facultet.name }}</p>
+        {% if book.description %}
+          <div class="book-hero__annotation">{{ book.description|safe }}</div>
+        {% elif book.annotation %}
+          <div class="book-hero__annotation">{{ book.annotation }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="chapters-layout">
+      <aside class="chapters-sidebar">
+        <h3>📑 Содержание</h3>
+        <nav class="chapters-list">
+          {% for ch in chapters %}
+            <a href="{% url 'books:chapter_detail' ch.id %}">
+              <span class="num">{{ forloop.counter }}</span>
+              <span>{{ ch.title }}</span>
+            </a>
+          {% empty %}
+            <p class="empty-msg">Глав пока нет.</p>
+          {% endfor %}
+        </nav>
+      </aside>
+
+      <section class="chapters-content">
+        <h2>О книге</h2>
+        <p>Выберите главу слева, чтобы начать чтение.</p>
+        {% if chapters %}
+          <p style="margin-top:20px;">
+            <a href="{% url 'books:chapter_detail' chapters.0.id %}"
+               style="display:inline-block;padding:12px 24px;background:linear-gradient(135deg,#4a90e2,#007aff);color:#fff;border-radius:10px;text-decoration:none;font-weight:500;">
+              📖 Начать с первой главы
+            </a>
+          </p>
+        {% endif %}
+      </section>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-column">
+        <img src="{% static 'image/emblem.png' %}" alt="logo" class="logo" />
+        <h3>Контакты</h3>
+        <p>160012, город Шымкент,<br>проспект Тауке хана, 5</p>
+        <p><strong>Канцелярия</strong><br>8 (725-2) 21-01-41</p>
+      </div>
+      <div class="footer-column">
+        <h3>О нас</h3>
+        <p><strong>Отдел разработки мультимедийного контента</strong></p>
+        <p>160012, город Шымкент,<br>проспект Тауке хана, 5, Корпус Г, ауд.115</p>
+        <p><strong>Контактный телефон</strong><br>8 (725-2) 30-05-72</p>
+        <p><a href="mailto:info@auezov.edu.kz">info@auezov.edu.kz</a></p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      © 2025 М.ӘУЕЗОВ АТЫНДАҒЫ ОҢТҮСТІК ҚАЗАҚСТАН УНИВЕРСИТЕТІ
+    </div>
+  </footer>
+
+  <script>
+    function toggleMenu() {
+      document.getElementById("navMenu").classList.toggle("show");
+    }
+    function scrollToFooter(event) {
+      event.preventDefault();
+      document.querySelector("footer").scrollIntoView({ behavior: "smooth" });
+    }
+    function toggleDropdown(event) {
+      event.preventDefault();
+      document.getElementById("dropdownMenu").classList.toggle("show");
+    }
+  </script>
+  <script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>

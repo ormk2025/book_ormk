@@ -16,12 +16,13 @@ staticfiles/
 *.log
 local_settings.py
 
-# === Migrations (опционально) ===
-*/migrations/*
-!*/migrations/__init__.py
+# === Migrations ===
+# Миграции ОБЯЗАТЕЛЬНО должны быть в репозитории: без них сервер
+# не сможет применить изменения схемы (manage.py migrate).
 
 # === Virtual environment ===
 venv/
+myenv/
 .env/
 env/
 .venv/

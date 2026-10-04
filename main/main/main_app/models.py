@@ -38,8 +38,23 @@ class Book(models.Model):
     )
     specialty_code = models.CharField(max_length=300, null=True, blank=True)
 
+    description = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="Описание (для веб-книги)",
+        help_text="Используется только для книг, создаваемых прямо на сайте."
+    )
+
     def __str__(self):
         return self.name
+
+    @property
+    def is_web_book(self):
+        return self.chapters.exists()
+
+    @property
+    def is_zip_book(self):
+        return bool(self.mobile_zip) and not self.is_web_book
 
     def get_index_html_path(self):
         """Возвращает URL к index.html — ищет и в корне, и внутри подпапок"""
@@ -110,6 +125,44 @@ def extract_zip_on_save(sender, instance, created, **kwargs):
             print(f"[ERROR] Ошибка при распаковке ZIP: {e}")
 
 
+
+
+class Chapter(models.Model):
+    book = models.ForeignKey(
+        Book,
+        on_delete=models.CASCADE,
+        related_name="chapters",
+        verbose_name="Книга",
+    )
+    title = models.CharField(max_length=255, verbose_name="Название главы")
+    order = models.PositiveIntegerField(default=0, db_index=True, verbose_name="Порядок")
+
+    class Meta:
+        ordering = ["order", "id"]
+        verbose_name = "Глава"
+        verbose_name_plural = "Главы"
+
+    def __str__(self):
+        return f"{self.book.name} — {self.title}"
+
+
+class BookElement(models.Model):
+    chapter = models.ForeignKey(
+        Chapter,
+        on_delete=models.CASCADE,
+        related_name="elements",
+        verbose_name="Глава",
+    )
+    content = models.TextField(verbose_name="Контент", blank=True, default="")
+    order = models.PositiveIntegerField(default=0, db_index=True, verbose_name="Порядок")
+
+    class Meta:
+        ordering = ["order", "id"]
+        verbose_name = "Блок контента"
+        verbose_name_plural = "Блоки контента"
+
+    def __str__(self):
+        return f"{self.chapter.title} — блок {self.order}"
 
 
 class VideoLecture(models.Model):

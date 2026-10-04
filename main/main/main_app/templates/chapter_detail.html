@@ -1,0 +1,234 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ chapter.title }} — {{ book.name }}</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+  <style>
+    .reader-page {
+      max-width: 1200px;
+      margin: 180px auto 60px;
+      padding: 0 24px;
+      font-family: 'Inter', sans-serif;
+      color: #222;
+    }
+    .reader-layout {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 30px;
+    }
+    .reader-sidebar {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.06);
+      padding: 24px;
+      position: sticky;
+      top: 180px;
+      align-self: start;
+      max-height: calc(100vh - 200px);
+      overflow-y: auto;
+    }
+    .reader-sidebar .book-ref {
+      font-size: .85rem;
+      color: #888;
+      margin-bottom: 4px;
+    }
+    .reader-sidebar h3 {
+      font-size: 1rem;
+      margin: 0 0 16px;
+      color: #1a1a1a;
+    }
+    .reader-sidebar a {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 12px;
+      border-radius: 10px;
+      text-decoration: none;
+      color: #333;
+      font-size: .95rem;
+      margin-bottom: 2px;
+    }
+    .reader-sidebar a:hover { background: #f0f6ff; color: #007aff; }
+    .reader-sidebar a.active { background: linear-gradient(135deg,#4a90e2,#007aff); color:#fff; }
+    .reader-sidebar a.active .num { background: rgba(255,255,255,.25); color:#fff; }
+    .reader-sidebar .num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #eaf2ff;
+      color: #007aff;
+      font-weight: 600;
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    .reader-content {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.06);
+      padding: 40px;
+    }
+    .breadcrumb {
+      font-size: .9rem;
+      color: #888;
+      margin-bottom: 12px;
+    }
+    .breadcrumb a { color: #007aff; text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .reader-content h1 {
+      font-size: 2rem;
+      margin: 0 0 24px;
+      color: #1a1a1a;
+      border-bottom: 2px solid #eaeaea;
+      padding-bottom: 14px;
+    }
+    .reader-block {
+      font-size: 1.05rem;
+      line-height: 1.8;
+      color: #333;
+      margin-bottom: 24px;
+    }
+    .reader-block img {
+      max-width: 100%;
+      border-radius: 10px;
+      margin: 12px 0;
+    }
+    .reader-block table { border-collapse: collapse; margin: 12px 0; }
+    .reader-block td, .reader-block th { border: 1px solid #ddd; padding: 8px 12px; }
+
+    .reader-nav {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid #eaeaea;
+    }
+    .reader-nav a {
+      padding: 12px 20px;
+      background: #f0f6ff;
+      color: #007aff;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background .2s;
+    }
+    .reader-nav a:hover { background: #e0ecff; }
+    .reader-nav .disabled { opacity: .4; pointer-events: none; }
+
+    @media (max-width: 900px) {
+      .reader-layout { grid-template-columns: 1fr; }
+      .reader-sidebar { position: static; max-height: none; }
+      .reader-content { padding: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="logo">
+      <div class="log_p"><img src="{% static 'image/emblem.png' %}" alt="logo" /></div>
+      <div class="site-title">ОТДЕЛ РАЗРАБОТКИ<br>МУЛЬТИМЕДИЙНОГО КОНТЕНТА</div>
+      <div><button class="menu-toggle" onclick="toggleMenu()">☰</button></div>
+    </div>
+    <nav class="nav" id="navMenu">
+      <a href="{% url 'books:index' %}">ГЛАВНАЯ</a>
+      <a href="{% url 'books:all_books' %}">ВСЕ КНИГИ</a>
+      <a href="{% url 'books:video_lectures' %}">ВИДЕОЛЕКЦИИ</a>
+      <div class="dropdown">
+        <a href="#" onclick="toggleDropdown(event)">КАТАЛОГ</a>
+        <div class="dropdown-content" id="dropdownMenu">
+          {% for facultet in facultets %}
+            <a href="{% url 'books:faculty_books' facultet.id %}">{{ facultet.name }}</a>
+          {% endfor %}
+        </div>
+      </div>
+      <a href="#contacts" onclick="scrollToFooter(event)">КОНТАКТЫ</a>
+    </nav>
+  </header>
+
+  <div class="reader-page">
+    <div class="reader-layout">
+      <aside class="reader-sidebar">
+        <div class="book-ref">Книга</div>
+        <h3><a href="{% url 'books:book_detail' book.id %}" style="color:#1a1a1a;text-decoration:none;">{{ book.name }}</a></h3>
+        {% for ch in chapters %}
+          <a href="{% url 'books:chapter_detail' ch.id %}" class="{% if ch.id == chapter.id %}active{% endif %}">
+            <span class="num">{{ forloop.counter }}</span>
+            <span>{{ ch.title }}</span>
+          </a>
+        {% endfor %}
+      </aside>
+
+      <section class="reader-content">
+        <div class="breadcrumb">
+          <a href="{% url 'books:index' %}">Главная</a> ›
+          <a href="{% url 'books:book_detail' book.id %}">{{ book.name }}</a> ›
+          <span>{{ chapter.title }}</span>
+        </div>
+
+        <h1>{{ chapter.title }}</h1>
+
+        {% for el in elements %}
+          <div class="reader-block">{{ el.content|safe }}</div>
+        {% empty %}
+          <p style="color:#888;font-style:italic;">Эта глава пока пустая.</p>
+        {% endfor %}
+
+        <div class="reader-nav">
+          {% if prev_chapter %}
+            <a href="{% url 'books:chapter_detail' prev_chapter.id %}">← {{ prev_chapter.title }}</a>
+          {% else %}
+            <a href="#" class="disabled">← Предыдущая</a>
+          {% endif %}
+          {% if next_chapter %}
+            <a href="{% url 'books:chapter_detail' next_chapter.id %}">{{ next_chapter.title }} →</a>
+          {% else %}
+            <a href="#" class="disabled">Следующая →</a>
+          {% endif %}
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-column">
+        <img src="{% static 'image/emblem.png' %}" alt="logo" class="logo" />
+        <h3>Контакты</h3>
+        <p>160012, город Шымкент,<br>проспект Тауке хана, 5</p>
+        <p><strong>Канцелярия</strong><br>8 (725-2) 21-01-41</p>
+      </div>
+      <div class="footer-column">
+        <h3>О нас</h3>
+        <p><strong>Отдел разработки мультимедийного контента</strong></p>
+        <p>160012, город Шымкент,<br>проспект Тауке хана, 5, Корпус Г, ауд.115</p>
+        <p><strong>Контактный телефон</strong><br>8 (725-2) 30-05-72</p>
+        <p><a href="mailto:info@auezov.edu.kz">info@auezov.edu.kz</a></p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      © 2025 М.ӘУЕЗОВ АТЫНДАҒЫ ОҢТҮСТІК ҚАЗАҚСТАН УНИВЕРСИТЕТІ
+    </div>
+  </footer>
+
+  <script>
+    function toggleMenu() {
+      document.getElementById("navMenu").classList.toggle("show");
+    }
+    function scrollToFooter(event) {
+      event.preventDefault();
+      document.querySelector("footer").scrollIntoView({ behavior: "smooth" });
+    }
+    function toggleDropdown(event) {
+      event.preventDefault();
+      document.getElementById("dropdownMenu").classList.toggle("show");
+    }
+  </script>
+  <script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>

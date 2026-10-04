@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Q
-from .models import Facultet, Book, VideoLecture
+from .models import Facultet, Book, VideoLecture, Chapter
 
 
 def index(request):
@@ -53,11 +53,41 @@ def faculty_books(request, facultet_id):
 def book_detail(request, book_id):
     book = get_object_or_404(Book, id=book_id)
     facultets = Facultet.objects.all()
+
+    if book.is_web_book:
+        chapters = book.chapters.all()
+        return render(request, 'book_detail_web.html', {
+            'book': book,
+            'facultets': facultets,
+            'chapters': chapters,
+        })
+
     index_html_path = book.get_index_html_path()
     return render(request, 'book_detail.html', {
         'book': book,
         'facultets': facultets,
         'index_html_path': index_html_path
+    })
+
+
+def chapter_detail(request, chapter_id):
+    chapter = get_object_or_404(Chapter, id=chapter_id)
+    book = chapter.book
+    facultets = Facultet.objects.all()
+    chapters = book.chapters.all()
+    elements = chapter.elements.all()
+    chapter_ids = list(chapters.values_list('id', flat=True))
+    idx = chapter_ids.index(chapter.id)
+    prev_chapter = chapters[idx - 1] if idx > 0 else None
+    next_chapter = chapters[idx + 1] if idx + 1 < len(chapter_ids) else None
+    return render(request, 'chapter_detail.html', {
+        'book': book,
+        'chapter': chapter,
+        'chapters': chapters,
+        'elements': elements,
+        'facultets': facultets,
+        'prev_chapter': prev_chapter,
+        'next_chapter': next_chapter,
     })
 
 

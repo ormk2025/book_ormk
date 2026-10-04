@@ -20,10 +20,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+import os
+
 SECRET_KEY = 'django-insecure-jt0s9=6-ge!k862ruqm0%+eyi+ymh*ma(amzsqi^fgdx0#jr-&'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+# Локально: DJANGO_DEBUG=True, на сервере переменная не задана -> False.
+# Включается только явными значениями, чтобы 'false' или '0' случайно
+# не включили отладку на продакшене.
+DEBUG = os.environ.get('DJANGO_DEBUG', '').lower() in ('1', 'true', 'yes', 'on')
 
 ALLOWED_HOSTS = ['*']
 
@@ -32,14 +36,83 @@ CSRF_TRUSTED_ORIGINS = ['https://book.auezov.edu.kz', 'https://www.book.auezov.e
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-	'main_app'
+    'adminsortable2',
+    'django_summernote',
+    'main_app',
 ]
+
+JAZZMIN_SETTINGS = {
+    "site_title": "ОРМК — Админка",
+    "site_header": "ОРМК",
+    "site_brand": "ОРМК",
+    "welcome_sign": "Добро пожаловать в панель управления",
+    "copyright": "М. Әуезов атындағы ОҚУ",
+    "search_model": ["main_app.Book", "main_app.Facultet"],
+    "topmenu_links": [
+        {"name": "На сайт", "url": "/", "new_window": True},
+        {"model": "main_app.Book"},
+    ],
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "main_app.Book": "fas fa-book",
+        "main_app.Facultet": "fas fa-university",
+        "main_app.VideoLecture": "fas fa-video",
+        "main_app.Chapter": "fas fa-list-ol",
+        "main_app.BookElement": "fas fa-align-left",
+    },
+    "order_with_respect_to": [
+        "main_app",
+        "main_app.Book",
+        "main_app.Facultet",
+        "main_app.VideoLecture",
+        "auth",
+    ],
+    "show_ui_builder": False,
+    "changeform_format": "horizontal_tabs",
+    "related_modal_active": True,
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "theme": "flatly",
+    "dark_mode_theme": "darkly",
+    "navbar": "navbar-primary navbar-dark",
+    "sidebar": "sidebar-dark-primary",
+    "accent": "accent-primary",
+    "actions_sticky_top": True,
+}
+
+X_FRAME_OPTIONS = 'SAMEORIGIN'
+SUMMERNOTE_THEME = 'bs4'
+SUMMERNOTE_CONFIG = {
+    'iframe': True,
+    # Загружать вложения может только авторизованный пользователь:
+    # по умолчанию /summernote/upload_attachment/ открыт для всех.
+    'attachment_require_authentication': True,
+    'summernote': {
+        'width': '100%',
+        'height': '400',
+        'lang': 'ru-RU',
+        'toolbar': [
+            ['style', ['style']],
+            ['font', ['bold', 'italic', 'underline', 'strikethrough', 'clear']],
+            ['fontsize', ['fontsize']],
+            ['color', ['color']],
+            ['para', ['ul', 'ol', 'paragraph']],
+            ['table', ['table']],
+            ['insert', ['link', 'picture', 'video', 'hr']],
+            ['view', ['fullscreen', 'codeview', 'help']],
+        ],
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
