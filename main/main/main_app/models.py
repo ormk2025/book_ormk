@@ -1,10 +1,14 @@
 from django.db import models
+import logging
 import os
 import shutil
+import tempfile
 import zipfile
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
 
 
 class Facultet(models.Model):
@@ -78,52 +82,67 @@ class Book(models.Model):
 
         return None
 
+def extract_book_zip(book):
+    """
+    Распаковывает архив книги в media/books/{id}/ и сохраняет путь к папке с index.html.
+
+    Архив сначала распаковывается во временную папку, поэтому битый архив или
+    архив без index.html не затрагивает уже опубликованную версию книги.
+    """
+    books_root = os.path.join(settings.MEDIA_ROOT, 'books')
+    os.makedirs(books_root, exist_ok=True)
+    temp_path = tempfile.mkdtemp(prefix=f'.extract_{book.pk}_', dir=books_root)
+
+    try:
+        with zipfile.ZipFile(book.mobile_zip.path, 'r') as zip_ref:
+            zip_ref.extractall(temp_path)
+
+        index_folder = next(
+            (root for root, dirs, files in os.walk(temp_path) if 'index.html' in files),
+            None,
+        )
+        if index_folder is None:
+            logger.warning("Книга %s: в архиве не найден index.html", book.pk)
+            return
+
+        folder = os.path.normpath(
+            os.path.join('books', str(book.pk), os.path.relpath(index_folder, temp_path))
+        )
+        final_path = os.path.join(books_root, str(book.pk))
+        if os.path.exists(final_path):
+            shutil.rmtree(final_path)
+        os.chmod(temp_path, 0o755)  # mkdtemp создаёт папку 0700, веб-сервер её не прочитает
+        os.replace(temp_path, final_path)
+
+        Book.objects.filter(pk=book.pk).update(mobile_folder=folder)
+        book.mobile_folder = folder
+    except (OSError, zipfile.BadZipFile) as e:
+        logger.error("Книга %s: ошибка при распаковке ZIP: %s", book.pk, e)
+    finally:
+        shutil.rmtree(temp_path, ignore_errors=True)
+
+
+@receiver(pre_save, sender=Book)
+def remember_previous_zip(sender, instance, **kwargs):
+    """Запоминает архив из базы, чтобы после сохранения понять, заменили ли его."""
+    instance._previous_zip = (
+        Book.objects.filter(pk=instance.pk).values_list('mobile_zip', flat=True).first()
+        if instance.pk else None
+    )
+
+
 @receiver(post_save, sender=Book)
-def extract_zip_on_save(sender, instance, created, **kwargs):
-    """
-    После загрузки ZIP:
-    - Распаковывает в media/books/{id}/
-    - Автоматически ищет index.html
-    - Сохраняет путь до папки, где он найден
-    """
-    if not created and 'mobile_zip' not in (kwargs.get('update_fields') or []):
+def extract_zip_on_save(sender, instance, raw=False, **kwargs):
+    """Распаковывает архив, если он новый или папки с книгой нет на диске."""
+    if raw or not instance.mobile_zip:
         return
 
-    if instance.mobile_zip:
-        extract_path = os.path.join(settings.MEDIA_ROOT, 'books', str(instance.id))
-
-        # 🧹 Удаляем старую папку книги, если она уже есть
-        if os.path.exists(extract_path):
-            shutil.rmtree(extract_path)
-
-        try:
-            os.makedirs(extract_path, exist_ok=True)
-
-            # 📦 Распаковываем архив
-            with zipfile.ZipFile(instance.mobile_zip.path, 'r') as zip_ref:
-                zip_ref.extractall(extract_path)
-
-            found_folder = None
-
-            # 🔍 Ищем, где находится index.html
-            for root, dirs, files in os.walk(extract_path):
-                if 'index.html' in files:
-                    found_folder = os.path.relpath(root, settings.MEDIA_ROOT)
-                    break
-
-            if found_folder:
-                # 🚫 Избегаем рекурсии при сохранении
-                post_save.disconnect(extract_zip_on_save, sender=Book)
-                instance.mobile_folder = found_folder
-                instance.save(update_fields=['mobile_folder'])
-                post_save.connect(extract_zip_on_save, sender=Book)
-                print(f"[OK] Книга распакована в: {found_folder}")
-            else:
-                print("[WARN] Не найден index.html в архиве")
-
-        except Exception as e:
-            print(f"[ERROR] Ошибка при распаковке ZIP: {e}")
-
+    zip_changed = instance.mobile_zip.name != getattr(instance, '_previous_zip', None)
+    folder_missing = not instance.mobile_folder or not os.path.isdir(
+        os.path.join(settings.MEDIA_ROOT, instance.mobile_folder)
+    )
+    if zip_changed or folder_missing:
+        extract_book_zip(instance)
 
 
 

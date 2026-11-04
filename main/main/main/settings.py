@@ -12,26 +12,60 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+
+from django.core.exceptions import ImproperlyConfigured
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-# BASE_DIR = Path('/var/www/clients/client3/web71/web/project')
-BASE_DIR = Path(__file__).resolve().parent.parent 
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+def load_env_file(path):
+    """Читает KEY=VALUE из .env. Уже заданные переменные окружения не перекрываются."""
+    if not path.exists():
+        return
+    for line in path.read_text(encoding='utf-8').splitlines():
+        line = line.strip()
+        if line and not line.startswith('#') and '=' in line:
+            key, value = line.split('=', 1)
+            os.environ.setdefault(key.strip(), value.strip())
+
+
+def env_list(name, default):
+    return [item.strip() for item in os.environ.get(name, default).split(',') if item.strip()]
+
+
+def env_flag(name):
+    # Включается только явными значениями, чтобы 'false' или '0' случайно
+    # не включили настройку на продакшене.
+    return os.environ.get(name, '').lower() in ('1', 'true', 'yes', 'on')
+
+
+load_env_file(BASE_DIR / '.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-import os
-
-SECRET_KEY = 'django-insecure-jt0s9=6-ge!k862ruqm0%+eyi+ymh*ma(amzsqi^fgdx0#jr-&'
-
 # Локально: DJANGO_DEBUG=True, на сервере переменная не задана -> False.
-# Включается только явными значениями, чтобы 'false' или '0' случайно
-# не включили отладку на продакшене.
-DEBUG = os.environ.get('DJANGO_DEBUG', '').lower() in ('1', 'true', 'yes', 'on')
+DEBUG = env_flag('DJANGO_DEBUG')
 
-ALLOWED_HOSTS = ['*']
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '')
+if not SECRET_KEY:
+    if not DEBUG:
+        raise ImproperlyConfigured('Задайте DJANGO_SECRET_KEY в файле .env')
+    SECRET_KEY = 'django-insecure-local-development-only'
 
-CSRF_TRUSTED_ORIGINS = ['https://book.auezov.edu.kz', 'https://www.book.auezov.edu.kz']
+ALLOWED_HOSTS = env_list('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1')
+
+CSRF_TRUSTED_ORIGINS = env_list(
+    'DJANGO_CSRF_TRUSTED_ORIGINS',
+    'https://book.auezov.edu.kz,https://www.book.auezov.edu.kz',
+)
+
+# Сайт работает за обратным прокси, gunicorn доступен только с 127.0.0.1
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Включить после настройки HTTPS
+SESSION_COOKIE_SECURE = CSRF_COOKIE_SECURE = env_flag('DJANGO_HTTPS')
 
 # Application definition
 
@@ -83,7 +117,6 @@ JAZZMIN_SETTINGS = {
 
 JAZZMIN_UI_TWEAKS = {
     "theme": "flatly",
-    "dark_mode_theme": "darkly",
     "navbar": "navbar-primary navbar-dark",
     "sidebar": "sidebar-dark-primary",
     "accent": "accent-primary",
