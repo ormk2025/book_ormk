@@ -58,7 +58,7 @@ ALLOWED_HOSTS = env_list('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1')
 
 CSRF_TRUSTED_ORIGINS = env_list(
     'DJANGO_CSRF_TRUSTED_ORIGINS',
-    'https://book.auezov.edu.kz,https://www.book.auezov.edu.kz',
+    'https://book.ukgu.kz',
 )
 
 # Сайт работает за обратным прокси, gunicorn доступен только с 127.0.0.1
