@@ -1,5 +1,6 @@
 import io
 import os
+import re
 import shutil
 import tempfile
 import zipfile
@@ -9,7 +10,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
-from .models import Book, BookElement, Chapter, Facultet, VideoLecture
+from .models import Book, BookElement, Chapter, Facultet, VideoLecture, VirtualLab
 
 
 def make_zip(files, name='book.zip'):
@@ -131,6 +132,51 @@ class PageTests(MediaTestCase):
                 self.assertContains(self.client.get(url), expected)
 
 
+class VirtualLabTests(MediaTestCase):
+    def create_lab(self, **kwargs):
+        return VirtualLab.objects.create(
+            title='Качество муки',
+            html_file=SimpleUploadedFile('Виртуальная лаборатория.html', b'<h1>lab</h1>'),
+            **kwargs,
+        )
+
+    def test_list_and_player(self):
+        lab = self.create_lab(description='Шесть опытов')
+        url = reverse('books:virtual_lab_detail', args=[lab.pk])
+        page = self.client.get(reverse('books:virtual_labs'))
+        self.assertContains(page, 'Качество муки')
+        self.assertContains(page, url)
+        self.assertContains(self.client.get(url), f'src="{lab.html_file.url}"')
+
+    def test_player_iframe_is_isolated_from_site(self):
+        html = self.client.get(
+            reverse('books:virtual_lab_detail', args=[self.create_lab().pk])
+        ).content.decode()
+        sandbox = re.search(r'sandbox="([^"]*)"', html).group(1).split()
+        self.assertIn('allow-scripts', sandbox)
+        self.assertNotIn('allow-same-origin', sandbox)
+
+    def test_unpublished_lab_is_hidden(self):
+        lab = self.create_lab(is_published=False)
+        self.assertNotContains(self.client.get(reverse('books:virtual_labs')), 'Качество муки')
+        response = self.client.get(reverse('books:virtual_lab_detail', args=[lab.pk]))
+        self.assertEqual(response.status_code, 404)
+
+    def test_every_page_links_to_section(self):
+        book = self.create_book()
+        web_book = self.create_book()
+        chapter = Chapter.objects.create(book=web_book, title='Глава 1')
+        for url in [
+            reverse('books:index'), reverse('books:all_books'), reverse('books:video_lectures'),
+            reverse('books:faculty_books', args=[self.facultet.pk]),
+            reverse('books:book_detail', args=[book.pk]),
+            reverse('books:book_detail', args=[web_book.pk]),
+            reverse('books:chapter_detail', args=[chapter.pk]),
+        ]:
+            with self.subTest(url=url):
+                self.assertContains(self.client.get(url), reverse('books:virtual_labs'))
+
+
 class AdminTests(MediaTestCase):
     def setUp(self):
         super().setUp()
@@ -165,6 +211,16 @@ class AdminTests(MediaTestCase):
         response = self.client.post(reverse('admin:main_app_book_change', args=[book.pk]), data)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(self.read_index(book), 'версия 2')
+
+    def test_virtual_lab_accepts_only_html(self):
+        url = reverse('admin:main_app_virtuallab_add')
+        self.assertEqual(self.client.get(url).status_code, 200)
+        data = {'title': 'Тема', 'order': 0, 'is_published': 'on'}
+        self.client.post(url, {**data, 'html_file': SimpleUploadedFile('lab.exe', b'x')})
+        self.assertEqual(VirtualLab.objects.count(), 0)
+        self.client.post(url, {**data, 'html_file': SimpleUploadedFile('lab.html', b'<p>x</p>')})
+        self.assertEqual(VirtualLab.objects.count(), 1)
+        self.assertContains(self.client.get(reverse('admin:main_app_virtuallab_changelist')), 'Открыть')
 
     def test_anonymous_cannot_upload_summernote_attachment(self):
         self.client.logout()

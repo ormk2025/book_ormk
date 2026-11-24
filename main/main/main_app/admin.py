@@ -1,9 +1,10 @@
 from django.contrib import admin
+from django.urls import reverse
 from django.utils.html import format_html
 from adminsortable2.admin import SortableAdminBase, SortableStackedInline, SortableTabularInline
 from django_summernote.admin import SummernoteModelAdmin, SummernoteInlineModelAdmin
 
-from .models import Book, Facultet, VideoLecture, Chapter, BookElement
+from .models import Book, Facultet, VideoLecture, Chapter, BookElement, VirtualLab
 
 
 @admin.register(Facultet)
@@ -24,6 +25,22 @@ class FacultetAdmin(admin.ModelAdmin):
 class VideoLectureAdmin(admin.ModelAdmin):
     list_display = ('title', 'video_file')
     search_fields = ('title',)
+
+
+@admin.register(VirtualLab)
+class VirtualLabAdmin(admin.ModelAdmin):
+    list_display = ('title', 'is_published', 'order', 'open_link')
+    list_editable = ('is_published', 'order')
+    search_fields = ('title',)
+
+    def open_link(self, obj):
+        if not obj.is_published:
+            return "—"
+        return format_html(
+            '<a href="{}" target="_blank">Открыть</a>',
+            reverse('books:virtual_lab_detail', args=[obj.pk]),
+        )
+    open_link.short_description = "На сайте"
 
 
 class ChapterInline(SortableTabularInline):

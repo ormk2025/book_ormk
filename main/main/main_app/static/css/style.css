@@ -137,6 +137,16 @@ body {
   width: 60%;
 }
 
+.beta {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--primary);
+  padding: 2px 6px;
+  border-radius: 999px;
+}
+
 .menu-toggle {
   display: none;
   font-size: 24px;
@@ -999,6 +1009,36 @@ body {
 /* ============================================
    RESPONSIVE
    ============================================ */
+@media (min-width: 769px) {
+  .nav a {
+    white-space: nowrap;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1240px) {
+  .header,
+  .header.scrolled {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .nav {
+    gap: 0;
+  }
+
+  .nav a,
+  .dropdown > a {
+    padding: 8px;
+    font-size: 12px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1060px) {
+  .site-title {
+    display: none;
+  }
+}
+
 @media (max-width: 768px) {
   .header {
     flex-direction: column;

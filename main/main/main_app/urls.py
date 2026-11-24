@@ -10,4 +10,6 @@ urlpatterns = [
     path('book/<int:book_id>/', views.book_detail, name='book_detail'),
     path('chapter/<int:chapter_id>/', views.chapter_detail, name='chapter_detail'),
     path('video-lectures/', views.video_lectures, name='video_lectures'),
+    path('virtual-labs/', views.virtual_labs, name='virtual_labs'),
+    path('virtual-labs/<int:lab_id>/', views.virtual_lab_detail, name='virtual_lab_detail'),
 ]

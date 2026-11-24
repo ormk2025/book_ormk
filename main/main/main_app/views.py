@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Q
-from .models import Facultet, Book, VideoLecture, Chapter
+from .models import Facultet, Book, VideoLecture, Chapter, VirtualLab
 
 
 def index(request):
@@ -101,3 +101,15 @@ def video_lectures(request):
         
         'videos': videos
     })
+
+
+def virtual_labs(request):
+    return render(request, 'virtual_labs.html', {
+        'facultets': Facultet.objects.all(),
+        'labs': VirtualLab.objects.filter(is_published=True),
+    })
+
+
+def virtual_lab_detail(request, lab_id):
+    lab = get_object_or_404(VirtualLab, id=lab_id, is_published=True)
+    return render(request, 'virtual_lab_detail.html', {'lab': lab})

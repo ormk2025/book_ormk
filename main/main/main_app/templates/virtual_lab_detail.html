@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ lab.title }} — 3D-виртуалка</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; }
+    body {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      height: 100dvh;
+      font: 14px/1.3 'Inter', system-ui, sans-serif;
+      background: #0a0e27;
+      color: #fff;
+    }
+    .bar { display: flex; align-items: center; gap: 12px; padding: 8px 14px; flex: none; }
+    .bar a, .bar button {
+      flex: none;
+      font: inherit;
+      font-weight: 600;
+      color: #fff;
+      background: rgba(255,255,255,0.12);
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .bar a:hover, .bar button:hover { background: rgba(255,255,255,0.22); }
+    .bar h1 { flex: 1; min-width: 0; font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .beta { font-size: 11px; font-weight: 700; background: #1a3dde; border-radius: 999px; padding: 3px 9px; flex: none; }
+    iframe { flex: 1; min-height: 0; width: 100%; border: 0; background: #fff; }
+    @media (max-width: 600px) { .bar { gap: 8px; padding: 6px 8px; } .wide { display: none; } }
+  </style>
+</head>
+<body>
+  <div class="bar">
+    <a href="{% url 'books:virtual_labs' %}" aria-label="Все виртуалки">← <span class="wide">Все виртуалки</span></a>
+    <h1>{{ lab.title }}</h1>
+    <span class="beta">бета</span>
+    <button type="button" id="fullscreen" hidden>⛶ <span class="wide">На весь экран</span></button>
+  </div>
+  {# Без allow-same-origin: скрипты виртуалки не получают доступа к сессии и админке сайта #}
+  <iframe id="lab" src="{{ lab.html_file.url }}" title="{{ lab.title }}"
+          sandbox="allow-scripts allow-forms allow-modals allow-popups allow-downloads allow-pointer-lock"
+          allow="fullscreen; clipboard-write"></iframe>
+  <script>
+    const frame = document.getElementById('lab');
+    const button = document.getElementById('fullscreen');
+    if (frame.requestFullscreen) {
+      button.hidden = false;
+      button.addEventListener('click', () => frame.requestFullscreen());
+    }
+  </script>
+</body>
+</html>

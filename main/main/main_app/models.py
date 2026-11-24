@@ -1,3 +1,4 @@
+from django.core.validators import FileExtensionValidator
 from django.db import models
 import logging
 import os
@@ -188,6 +189,30 @@ class VideoLecture(models.Model):
     title = models.CharField(max_length=300)
     video_file = models.FileField(upload_to='video_lectures/')
     description = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.title
+
+
+class VirtualLab(models.Model):
+    title = models.CharField(max_length=300, verbose_name="Тема")
+    description = models.TextField(blank=True, default="", verbose_name="Описание")
+    cover = models.ImageField(
+        upload_to='virtual_labs/covers/', blank=True, null=True, verbose_name="Обложка"
+    )
+    html_file = models.FileField(
+        upload_to='virtual_labs/',
+        validators=[FileExtensionValidator(['html', 'htm'])],
+        verbose_name="HTML-файл",
+        help_text="Один самодостаточный HTML-файл: стили и скрипты внутри него или по ссылкам из интернета.",
+    )
+    is_published = models.BooleanField(default=True, verbose_name="Показывать на сайте")
+    order = models.PositiveIntegerField(default=0, db_index=True, verbose_name="Порядок")
+
+    class Meta:
+        ordering = ["order", "-id"]
+        verbose_name = "3D-виртуалка"
+        verbose_name_plural = "3D-виртуалки (бета)"
 
     def __str__(self):
         return self.title
