@@ -1,5 +1,12 @@
-from django.shortcuts import render, get_object_or_404
+from django.db import DatabaseError
+from django.http import Http404, JsonResponse
+from django.shortcuts import redirect, render, get_object_or_404
+from django.utils.encoding import iri_to_uri
+from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET, require_POST
 from django.db.models import Q
+from . import stats
 from .models import Facultet, Book, VideoLecture, Chapter, VirtualLab
 
 
@@ -80,7 +87,7 @@ def chapter_detail(request, chapter_id):
     idx = chapter_ids.index(chapter.id)
     prev_chapter = chapters[idx - 1] if idx > 0 else None
     next_chapter = chapters[idx + 1] if idx + 1 < len(chapter_ids) else None
-    return render(request, 'chapter_detail.html', {
+    response = render(request, 'chapter_detail.html', {
         'book': book,
         'chapter': chapter,
         'chapters': chapters,
@@ -89,6 +96,8 @@ def chapter_detail(request, chapter_id):
         'prev_chapter': prev_chapter,
         'next_chapter': next_chapter,
     })
+    stats.count_reader(request, response, book, path='/chapter/')
+    return response
 
 
 
@@ -113,3 +122,33 @@ def virtual_labs(request):
 def virtual_lab_detail(request, lab_id):
     lab = get_object_or_404(VirtualLab, id=lab_id, is_published=True)
     return render(request, 'virtual_lab_detail.html', {'lab': lab})
+
+
+@never_cache
+@require_GET
+def read_book(request, book_id):
+    """Считает читателя и открывает файл ZIP-книги."""
+    book = get_object_or_404(Book, id=book_id)
+    index_html_path = book.get_index_html_path()
+    if not index_html_path:
+        raise Http404
+    response = redirect(iri_to_uri(index_html_path))
+    stats.count_reader(request, response, book, path=request.path)
+    return response
+
+
+# Без CSRF-токена: запрос только увеличивает счётчик и не использует права пользователя
+@csrf_exempt
+@never_cache
+@require_POST
+def visit(request):
+    try:
+        counted = 'visited' not in request.COOKIES and stats.is_countable(request)
+        if counted:
+            stats.count_visit()
+        response = JsonResponse(stats.visit_totals())
+    except DatabaseError:
+        return JsonResponse({}, status=503)
+    if counted:
+        stats.set_day_cookie(response, 'visited')
+    return response

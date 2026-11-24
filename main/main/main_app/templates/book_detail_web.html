@@ -155,6 +155,7 @@
         <p><strong>Автор:</strong> {{ book.author }}</p>
         <p><strong>Год:</strong> {{ book.year }}</p>
         <p><strong>Факультет:</strong> {{ book.facultet.name }}</p>
+        <p><strong>Читателей:</strong> {{ book.readers }}</p>
         {% if book.description %}
           <div class="book-hero__annotation">{{ book.description|safe }}</div>
         {% elif book.annotation %}
@@ -212,6 +213,7 @@
     <div class="footer-bottom">
       © 2025 М.ӘУЕЗОВ АТЫНДАҒЫ ОҢТҮСТІК ҚАЗАҚСТАН УНИВЕРСИТЕТІ
     </div>
+    {% include 'includes/visits.html' %}
   </footer>
 
   <script>

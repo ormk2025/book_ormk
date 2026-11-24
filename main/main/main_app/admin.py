@@ -4,7 +4,7 @@ from django.utils.html import format_html
 from adminsortable2.admin import SortableAdminBase, SortableStackedInline, SortableTabularInline
 from django_summernote.admin import SummernoteModelAdmin, SummernoteInlineModelAdmin
 
-from .models import Book, Facultet, VideoLecture, Chapter, BookElement, VirtualLab
+from .models import Book, Facultet, VideoLecture, Chapter, BookElement, VirtualLab, DailyVisits
 
 
 @admin.register(Facultet)
@@ -25,6 +25,21 @@ class FacultetAdmin(admin.ModelAdmin):
 class VideoLectureAdmin(admin.ModelAdmin):
     list_display = ('title', 'video_file')
     search_fields = ('title',)
+
+
+@admin.register(DailyVisits)
+class DailyVisitsAdmin(admin.ModelAdmin):
+    list_display = ('date', 'visitors')
+    date_hierarchy = 'date'
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(VirtualLab)
@@ -62,7 +77,7 @@ class BookElementInline(SortableStackedInline, SummernoteInlineModelAdmin):
 class BookAdmin(SortableAdminBase, admin.ModelAdmin):
     list_display = (
         'cover_preview', 'name', 'author', 'year', 'facultet',
-        'book_type_badge', 'last_book', 'number',
+        'book_type_badge', 'last_book', 'number', 'readers',
     )
     list_display_links = ('cover_preview', 'name')
     list_filter = ('facultet', 'last_book', 'year')

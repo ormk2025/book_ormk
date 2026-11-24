@@ -1,0 +1,13 @@
+<p id="visits" hidden style="text-align:center;font-size:13px;margin-top:10px;opacity:.8">Посетителей сегодня: <b data-visits="today"></b> · всего: <b data-visits="total"></b></p>
+<script>
+fetch("{% url 'books:visit' %}", {method: "POST", credentials: "same-origin"})
+  .then(r => r.ok ? r.json() : Promise.reject())
+  .then(data => {
+    const box = document.getElementById("visits");
+    for (const key of ["today", "total"]) {
+      box.querySelector(`[data-visits=${key}]`).textContent = data[key].toLocaleString("ru-RU");
+    }
+    box.hidden = false;
+  })
+  .catch(() => {});
+</script>

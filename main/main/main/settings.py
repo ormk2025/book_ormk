@@ -101,6 +101,7 @@ JAZZMIN_SETTINGS = {
         "main_app.Facultet": "fas fa-university",
         "main_app.VideoLecture": "fas fa-video",
         "main_app.VirtualLab": "fas fa-cube",
+        "main_app.DailyVisits": "fas fa-chart-line",
         "main_app.Chapter": "fas fa-list-ol",
         "main_app.BookElement": "fas fa-align-left",
     },
@@ -214,7 +215,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Almaty'
 
 USE_I18N = True
 

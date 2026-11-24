@@ -156,10 +156,11 @@
     <p><strong>Автор:</strong> {{ book.author }}</p>
     <p><strong>Год:</strong> {{ book.year }}</p>
     <p><strong>Факультет:</strong> {{ book.facultet.name }}</p>
+    <p><strong>Читателей:</strong> {{ book.readers }}</p>
     <p><strong>Аннотация:</strong> {{ book.annotation }}</p>
 
     {% if index_html_path %}
-      <a href="{{ index_html_path }}" target="_blank" class="read-link">📖 Читать книгу</a>
+      <a href="{% url 'books:read_book' book.id %}" target="_blank" rel="nofollow" class="read-link">📖 Читать книгу</a>
     {% else %}
       <p>⚠️ Файл книги не загружен.</p>
     {% endif %}
@@ -188,6 +189,7 @@
     <div class="footer-bottom">
       © 2025 М.ӘУЕЗОВ АТЫНДАҒЫ ОҢТҮСТІК ҚАЗАҚСТАН УНИВЕРСИТЕТІ
     </div>
+    {% include 'includes/visits.html' %}
   </footer>
   <script src="{% static 'js/main.js' %}"></script>
    <script>

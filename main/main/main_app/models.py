@@ -42,6 +42,7 @@ class Book(models.Model):
         verbose_name="Папка с HTML книгой"
     )
     specialty_code = models.CharField(max_length=300, null=True, blank=True)
+    readers = models.PositiveIntegerField(default=0, db_default=0, editable=False, verbose_name="Читателей")
 
     description = models.TextField(
         blank=True,
@@ -216,3 +217,16 @@ class VirtualLab(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class DailyVisits(models.Model):
+    date = models.DateField(unique=True, verbose_name="Дата")
+    visitors = models.PositiveIntegerField(default=0, verbose_name="Посетителей")
+
+    class Meta:
+        ordering = ["-date"]
+        verbose_name = "Посещения за день"
+        verbose_name_plural = "Статистика посещений"
+
+    def __str__(self):
+        return f"{self.date:%d.%m.%Y}: {self.visitors}"

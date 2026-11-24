@@ -4,13 +4,18 @@ import re
 import shutil
 import tempfile
 import zipfile
+from datetime import timedelta
+from unittest.mock import patch
+from urllib.parse import unquote
 
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db import OperationalError
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
 
-from .models import Book, BookElement, Chapter, Facultet, VideoLecture, VirtualLab
+from .models import Book, BookElement, Chapter, DailyVisits, Facultet, VideoLecture, VirtualLab
 
 
 def make_zip(files, name='book.zip'):
@@ -123,7 +128,7 @@ class PageTests(MediaTestCase):
             (reverse('books:index') + '?q=Книга', 'Книга'),
             (reverse('books:all_books'), 'Книга'),
             (reverse('books:faculty_books', args=[self.facultet.pk]), 'Книга'),
-            (reverse('books:book_detail', args=[zip_book.pk]), f'/media/books/{zip_book.pk}/index.html'),
+            (reverse('books:book_detail', args=[zip_book.pk]), reverse('books:read_book', args=[zip_book.pk])),
             (reverse('books:book_detail', args=[web_book.pk]), 'Глава 1'),
             (reverse('books:chapter_detail', args=[chapter.pk]), 'Текст главы'),
             (reverse('books:video_lectures'), 'Лекция'),
@@ -177,6 +182,73 @@ class VirtualLabTests(MediaTestCase):
                 self.assertContains(self.client.get(url), reverse('books:virtual_labs'))
 
 
+BROWSER = {'HTTP_USER_AGENT': 'Mozilla/5.0 (Windows NT 10.0) Chrome/130.0'}
+
+
+class StatsTests(MediaTestCase):
+    def setUp(self):
+        super().setUp()
+        self.visit_url = reverse('books:visit')
+
+    def test_browser_counted_once_a_day(self):
+        self.assertEqual(self.client.post(self.visit_url, **BROWSER).json(), {'today': 1, 'total': 1})
+        self.assertEqual(self.client.post(self.visit_url, **BROWSER).json(), {'today': 1, 'total': 1})
+        other = self.client_class()
+        self.assertEqual(other.post(self.visit_url, **BROWSER).json(), {'today': 2, 'total': 2})
+
+    def test_total_includes_previous_days(self):
+        DailyVisits.objects.create(date=timezone.localdate() - timedelta(days=1), visitors=10)
+        self.assertEqual(self.client.post(self.visit_url, **BROWSER).json(), {'today': 1, 'total': 11})
+
+    def test_bots_are_not_counted(self):
+        for agent in ['Googlebot/2.1', 'curl/8.0', '']:
+            response = self.client.post(self.visit_url, HTTP_USER_AGENT=agent)
+            self.assertEqual(response.json(), {'today': 0, 'total': 0})
+
+    def test_visit_needs_no_csrf_token_and_only_post(self):
+        strict = self.client_class(enforce_csrf_checks=True)
+        self.assertEqual(strict.post(self.visit_url, **BROWSER).status_code, 200)
+        self.assertEqual(self.client.get(self.visit_url, **BROWSER).status_code, 405)
+
+    def test_zip_book_readers(self):
+        book = self.create_book(mobile_zip=make_zip({'глава/index.html': 'книга'}))
+        url = reverse('books:read_book', args=[book.pk])
+        response = self.client.get(url, **BROWSER)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(unquote(response['Location']), f'/media/books/{book.pk}/глава/index.html')
+        self.client.get(url, **BROWSER)
+        self.client_class().get(url, HTTP_USER_AGENT='Googlebot/2.1')
+        self.client_class().get(url, **BROWSER)
+        book.refresh_from_db()
+        self.assertEqual(book.readers, 2)
+        self.assertContains(self.client.get(reverse('books:book_detail', args=[book.pk])), 'Читателей:</strong> 2')
+
+    def test_reading_one_book_does_not_block_another(self):
+        books = [self.create_book(mobile_zip=make_zip({'index.html': 'x'})) for _ in range(2)]
+        for book in books:
+            self.client.get(reverse('books:read_book', args=[book.pk]), **BROWSER)
+            book.refresh_from_db()
+            self.assertEqual(book.readers, 1)
+
+    def test_web_book_counts_reader_once_for_all_chapters(self):
+        book = self.create_book()
+        for number in (1, 2):
+            chapter = Chapter.objects.create(book=book, title=f'Глава {number}')
+            self.client.get(reverse('books:chapter_detail', args=[chapter.pk]), **BROWSER)
+        book.refresh_from_db()
+        self.assertEqual(book.readers, 1)
+
+    def test_book_without_file(self):
+        url = reverse('books:read_book', args=[self.create_book().pk])
+        self.assertEqual(self.client.get(url, **BROWSER).status_code, 404)
+
+    def test_counter_failure_does_not_block_reading(self):
+        book = self.create_book(mobile_zip=make_zip({'index.html': 'x'}))
+        with patch('main_app.stats.Book.objects.filter', side_effect=OperationalError('locked')):
+            response = self.client.get(reverse('books:read_book', args=[book.pk]), **BROWSER)
+        self.assertEqual(response.status_code, 302)
+
+
 class AdminTests(MediaTestCase):
     def setUp(self):
         super().setUp()
@@ -191,6 +263,7 @@ class AdminTests(MediaTestCase):
             reverse('admin:index'),
             reverse('admin:main_app_book_changelist'),
             reverse('admin:main_app_book_add'),
+            reverse('admin:main_app_dailyvisits_changelist'),
             reverse('admin:main_app_book_change', args=[book.pk]),
             reverse('admin:main_app_chapter_change', args=[chapter.pk]),
         ]:
